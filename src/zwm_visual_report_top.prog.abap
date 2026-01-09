@@ -88,8 +88,7 @@ TYPES:
     tanum       TYPE tanum,         " Transfer Order Number
     tapos       TYPE tapos,         " Item Number
     bwlvs       TYPE bwlvs,         " Movement Type
-    betyp       TYPE ltap-betyp,    " Source Document Type
-    benum       TYPE ltap-benum,    " Source Document
+    refnr       TYPE char10,        " Reference Number
     nltyp       TYPE nltyp,         " Destination Storage Type
     nlpla       TYPE nlpla,         " Destination Storage Bin
     vltyp       TYPE vltyp,         " Source Storage Type
@@ -97,14 +96,13 @@ TYPES:
     matnr       TYPE matnr,         " Material
     werks       TYPE werks_d,       " Plant
     maktx       TYPE maktx,         " Material Description
-    vsolm       TYPE ltap-vsolm,    " Source Quantity
-    vsola       TYPE ltap-vsola,    " Source Qty Alt. UOM
+    vsolm       TYPE menge_d,       " Source Quantity
     meins       TYPE meins,         " Unit
-    bdatu       TYPE ltap-bdatu,    " Creation Date
-    bupts       TYPE ltap-bupts,    " Creation Time
-    kdatu       TYPE ltap-kdatu,    " Confirmation Date
-    kupts       TYPE ltap-kupts,    " Confirmation Time
-    pession     TYPE ltap-pession,  " Confirmed by
+    bdatu       TYPE sydatum,       " Creation Date
+    bupts       TYPE syuzeit,       " Creation Time
+    kdatu       TYPE sydatum,       " Confirmation Date
+    kupts       TYPE syuzeit,       " Confirmation Time
+    pession     TYPE char12,        " Confirmed by
     status      TYPE char10,        " Status text
     status_icon TYPE icon_d,        " Status icon
     wait_hours  TYPE p LENGTH 7 DECIMALS 2, " Hours waiting
@@ -168,7 +166,7 @@ TYPES:
 TYPES:
   BEGIN OF gty_user_workload,
     lgnum           TYPE lgnum,
-    pession         TYPE ltap-pession,
+    pession         TYPE char12,
     user_name       TYPE char80,
     to_confirmed    TYPE i,
     items_processed TYPE p LENGTH 15 DECIMALS 3,
@@ -209,14 +207,14 @@ TYPES:
     tapos         TYPE tapos,
     matnr         TYPE matnr,
     maktx         TYPE maktx,
-    vsolm         TYPE ltap-vsolm,
+    vsolm         TYPE menge_d,
     meins         TYPE meins,
     vltyp         TYPE vltyp,
     vlpla         TYPE vlpla,
     nltyp         TYPE nltyp,
     nlpla         TYPE nlpla,
-    bdatu         TYPE ltap-bdatu,
-    bupts         TYPE ltap-bupts,
+    bdatu         TYPE sydatum,
+    bupts         TYPE syuzeit,
     timestamp     TYPE timestamp,
     direction     TYPE char30,    " Arrow representation
   END OF gty_movement_sim,

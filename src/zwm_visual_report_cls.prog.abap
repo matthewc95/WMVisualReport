@@ -314,15 +314,14 @@ CLASS lcl_data_extractor IMPLEMENTATION.
 
   METHOD extract_transfer_orders.
     DATA: lt_ltap TYPE STANDARD TABLE OF ltap,
-          lt_ltak TYPE STANDARD TABLE OF ltak,
           ls_to   TYPE gty_transfer_order.
 
-    " Extract TO items
-    SELECT lgnum, tanum, tapos, bwlvs, betyp, benum,
+    " Extract TO items - use only guaranteed standard fields
+    SELECT lgnum, tanum, tapos, bwlvs,
            vltyp, vlpla, nltyp, nlpla, matnr, werks,
-           vsolm, vsola, meins, bdatu, bupts, kdatu, kupts, pession
+           vsolm, meins, bdatu, bupts, kdatu, kupts
       FROM ltap
-      INTO TABLE @lt_ltap
+      INTO CORRESPONDING FIELDS OF TABLE @lt_ltap
       WHERE lgnum IN @mt_lgnum
         AND bwlvs IN @mt_bwlvs
         AND matnr IN @mt_matnr
@@ -337,8 +336,6 @@ CLASS lcl_data_extractor IMPLEMENTATION.
       ls_to-tanum = ls_ltap-tanum.
       ls_to-tapos = ls_ltap-tapos.
       ls_to-bwlvs = ls_ltap-bwlvs.
-      ls_to-betyp = ls_ltap-betyp.
-      ls_to-benum = ls_ltap-benum.
       ls_to-vltyp = ls_ltap-vltyp.
       ls_to-vlpla = ls_ltap-vlpla.
       ls_to-nltyp = ls_ltap-nltyp.
@@ -346,13 +343,11 @@ CLASS lcl_data_extractor IMPLEMENTATION.
       ls_to-matnr = ls_ltap-matnr.
       ls_to-werks = ls_ltap-werks.
       ls_to-vsolm = ls_ltap-vsolm.
-      ls_to-vsola = ls_ltap-vsola.
       ls_to-meins = ls_ltap-meins.
       ls_to-bdatu = ls_ltap-bdatu.
       ls_to-bupts = ls_ltap-bupts.
       ls_to-kdatu = ls_ltap-kdatu.
       ls_to-kupts = ls_ltap-kupts.
-      ls_to-pession = ls_ltap-pession.
 
       " Get material description
       ls_to-maktx = get_material_description( ls_ltap-matnr ).
