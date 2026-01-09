@@ -13,11 +13,11 @@ CLASS lcl_utilities DEFINITION FINAL.
       " Conversion methods
       get_status_icon
         IMPORTING iv_status       TYPE char1
-        RETURNING VALUE(rv_icon)  TYPE icon_d,
+        RETURNING VALUE(rv_icon)  TYPE char4,
 
       get_trend_icon
         IMPORTING iv_trend        TYPE char1
-        RETURNING VALUE(rv_icon)  TYPE icon_d,
+        RETURNING VALUE(rv_icon)  TYPE char4,
 
       get_color_code
         IMPORTING iv_status       TYPE char1
@@ -152,14 +152,21 @@ ENDCLASS.
 *----------------------------------------------------------------------*
 CLASS lcl_data_extractor DEFINITION FINAL.
   PUBLIC SECTION.
+    " Range types using primitive char types
+    TYPES: gty_r_lgnum TYPE RANGE OF char3,
+           gty_r_lgtyp TYPE RANGE OF char3,
+           gty_r_lgpla TYPE RANGE OF char10,
+           gty_r_matnr TYPE RANGE OF char18,
+           gty_r_bwlvs TYPE RANGE OF char3.
+
     METHODS:
       constructor
         IMPORTING
-          it_lgnum TYPE RANGE OF lgnum
-          it_lgtyp TYPE RANGE OF lgtyp
-          it_lgpla TYPE RANGE OF lgpla
-          it_matnr TYPE RANGE OF matnr
-          it_bwlvs TYPE RANGE OF bwlvs
+          it_lgnum TYPE gty_r_lgnum
+          it_lgtyp TYPE gty_r_lgtyp
+          it_lgpla TYPE gty_r_lgpla
+          it_matnr TYPE gty_r_matnr
+          it_bwlvs TYPE gty_r_bwlvs
           iv_date_from TYPE sydatum
           iv_date_to   TYPE sydatum,
 
@@ -168,9 +175,6 @@ CLASS lcl_data_extractor DEFINITION FINAL.
 
       extract_transfer_orders
         RETURNING VALUE(rt_orders) TYPE gty_transfer_orders,
-
-      extract_quants
-        RETURNING VALUE(rt_quants) TYPE STANDARD TABLE OF lqua,
 
       get_storage_type_summary
         RETURNING VALUE(rt_summary) TYPE gty_storage_type_sums,
@@ -198,27 +202,27 @@ CLASS lcl_data_extractor DEFINITION FINAL.
 
   PRIVATE SECTION.
     DATA:
-      mt_lgnum     TYPE RANGE OF lgnum,
-      mt_lgtyp     TYPE RANGE OF lgtyp,
-      mt_lgpla     TYPE RANGE OF lgpla,
-      mt_matnr     TYPE RANGE OF matnr,
-      mt_bwlvs     TYPE RANGE OF bwlvs,
+      mt_lgnum     TYPE gty_r_lgnum,
+      mt_lgtyp     TYPE gty_r_lgtyp,
+      mt_lgpla     TYPE gty_r_lgpla,
+      mt_matnr     TYPE gty_r_matnr,
+      mt_bwlvs     TYPE gty_r_bwlvs,
       mv_date_from TYPE sydatum,
       mv_date_to   TYPE sydatum.
 
     METHODS:
       get_movement_type_text
-        IMPORTING iv_bwlvs       TYPE bwlvs
-        RETURNING VALUE(rv_text) TYPE t333t-btext,
+        IMPORTING iv_bwlvs       TYPE char3
+        RETURNING VALUE(rv_text) TYPE char40,
 
       get_material_description
-        IMPORTING iv_matnr       TYPE matnr
-        RETURNING VALUE(rv_text) TYPE maktx,
+        IMPORTING iv_matnr       TYPE char18
+        RETURNING VALUE(rv_text) TYPE char40,
 
       get_storage_type_text
-        IMPORTING iv_lgnum       TYPE lgnum
-                  iv_lgtyp       TYPE lgtyp
-        RETURNING VALUE(rv_text) TYPE t301t-ltypt.
+        IMPORTING iv_lgnum       TYPE char3
+                  iv_lgtyp       TYPE char3
+        RETURNING VALUE(rv_text) TYPE char25.
 
 ENDCLASS.
 

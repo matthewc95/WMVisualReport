@@ -1,7 +1,7 @@
 *&---------------------------------------------------------------------*
 *& Include ZWM_VISUAL_REPORT_TOP
 *&---------------------------------------------------------------------*
-*& Global Data Definitions, Types, Constants
+*& Global Data Definitions - Using ONLY primitive ABAP types
 *&---------------------------------------------------------------------*
 
 *----------------------------------------------------------------------*
@@ -10,7 +10,7 @@
 TYPE-POOLS: icon, col, slis.
 
 *----------------------------------------------------------------------*
-* Tables
+* Tables (for selection screen only)
 *----------------------------------------------------------------------*
 TABLES: t300,      " Warehouse Numbers
         t301,      " Storage Types
@@ -52,87 +52,87 @@ CONSTANTS:
   gc_max_records    TYPE i VALUE 100000.
 
 *----------------------------------------------------------------------*
-* Types - Storage Bin Monitoring
+* Types - Storage Bin Monitoring (primitive types only)
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_storage_bin,
-    lgnum       TYPE lgnum,         " Warehouse Number
-    lgtyp       TYPE lgtyp,         " Storage Type
-    lgpla       TYPE lgpla,         " Storage Bin
-    lgber       TYPE lgber,         " Storage Section
-    lptyp       TYPE char4,         " Bin Type
+    lgnum       TYPE char3,          " Warehouse Number
+    lgtyp       TYPE char3,          " Storage Type
+    lgpla       TYPE char10,         " Storage Bin
+    lgber       TYPE char3,          " Storage Section
+    lptyp       TYPE char4,          " Bin Type
     maxgew      TYPE p LENGTH 10 DECIMALS 3, " Maximum Weight
-    maxle       TYPE i,             " Maximum Capacity
-    anzle       TYPE i,             " Current LE count
-    verme       TYPE menge_d,       " Available quantity
-    gesme       TYPE menge_d,       " Total quantity
-    einme       TYPE meins,         " Unit of entry
+    maxle       TYPE i,              " Maximum Capacity
+    anzle       TYPE i,              " Current LE count
+    verme       TYPE p LENGTH 13 DECIMALS 3, " Available quantity
+    gesme       TYPE p LENGTH 13 DECIMALS 3, " Total quantity
+    einme       TYPE char3,          " Unit of entry
     occupancy   TYPE p LENGTH 5 DECIMALS 2, " Occupancy %
-    status      TYPE char1,         " Status indicator
-    status_icon TYPE icon_d,        " Icon for display
-    matnr       TYPE matnr,         " Material (if single)
-    mat_count   TYPE i,             " Count of materials
-    quant_count TYPE i,             " Count of quants
-    blocked     TYPE char1,         " Blocked indicator
-    color       TYPE char4,         " Row color
+    status      TYPE char1,          " Status indicator
+    status_icon TYPE char4,          " Icon for display
+    matnr       TYPE char18,         " Material (if single)
+    mat_count   TYPE i,              " Count of materials
+    quant_count TYPE i,              " Count of quants
+    blocked     TYPE char1,          " Blocked indicator
+    color       TYPE char4,          " Row color
   END OF gty_storage_bin,
 
-  gty_storage_bins TYPE STANDARD TABLE OF gty_storage_bin WITH KEY lgnum lgtyp lgpla.
+  gty_storage_bins TYPE STANDARD TABLE OF gty_storage_bin WITH DEFAULT KEY.
 
 *----------------------------------------------------------------------*
-* Types - Transfer Orders
+* Types - Transfer Orders (primitive types only)
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_transfer_order,
-    lgnum       TYPE lgnum,         " Warehouse Number
-    tanum       TYPE tanum,         " Transfer Order Number
-    tapos       TYPE tapos,         " Item Number
-    bwlvs       TYPE bwlvs,         " Movement Type
-    refnr       TYPE char10,        " Reference Number
-    nltyp       TYPE nltyp,         " Destination Storage Type
-    nlpla       TYPE nlpla,         " Destination Storage Bin
-    vltyp       TYPE vltyp,         " Source Storage Type
-    vlpla       TYPE vlpla,         " Source Storage Bin
-    matnr       TYPE matnr,         " Material
-    werks       TYPE werks_d,       " Plant
-    maktx       TYPE maktx,         " Material Description
-    vsolm       TYPE menge_d,       " Source Quantity
-    meins       TYPE meins,         " Unit
-    bdatu       TYPE sydatum,       " Creation Date
-    bupts       TYPE syuzeit,       " Creation Time
-    kdatu       TYPE sydatum,       " Confirmation Date
-    kupts       TYPE syuzeit,       " Confirmation Time
-    pession     TYPE char12,        " Confirmed by
-    status      TYPE char10,        " Status text
-    status_icon TYPE icon_d,        " Status icon
+    lgnum       TYPE char3,          " Warehouse Number
+    tanum       TYPE char10,         " Transfer Order Number
+    tapos       TYPE numc4,          " Item Number
+    bwlvs       TYPE char3,          " Movement Type
+    refnr       TYPE char10,         " Reference Number
+    nltyp       TYPE char3,          " Destination Storage Type
+    nlpla       TYPE char10,         " Destination Storage Bin
+    vltyp       TYPE char3,          " Source Storage Type
+    vlpla       TYPE char10,         " Source Storage Bin
+    matnr       TYPE char18,         " Material
+    werks       TYPE char4,          " Plant
+    maktx       TYPE char40,         " Material Description
+    vsolm       TYPE p LENGTH 13 DECIMALS 3, " Source Quantity
+    meins       TYPE char3,          " Unit
+    bdatu       TYPE sydatum,        " Creation Date
+    bupts       TYPE syuzeit,        " Creation Time
+    kdatu       TYPE sydatum,        " Confirmation Date
+    kupts       TYPE syuzeit,        " Confirmation Time
+    pession     TYPE char12,         " Confirmed by
+    status      TYPE char10,         " Status text
+    status_icon TYPE char4,          " Status icon
     wait_hours  TYPE p LENGTH 7 DECIMALS 2, " Hours waiting
-    color       TYPE char4,         " Row color
-    confirmed   TYPE char1,         " X = confirmed
+    color       TYPE char4,          " Row color
+    confirmed   TYPE char1,          " X = confirmed
   END OF gty_transfer_order,
 
-  gty_transfer_orders TYPE STANDARD TABLE OF gty_transfer_order WITH KEY lgnum tanum tapos.
+  gty_transfer_orders TYPE STANDARD TABLE OF gty_transfer_order WITH DEFAULT KEY.
 
 *----------------------------------------------------------------------*
-* Types - KPIs
+* Types - KPIs (primitive types only)
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_kpi_summary,
     description TYPE char60,
     value       TYPE char30,
     unit        TYPE char10,
-    trend       TYPE char1,         " U=Up, D=Down, S=Stable
-    trend_icon  TYPE icon_d,
+    trend       TYPE char1,          " U=Up, D=Down, S=Stable
+    trend_icon  TYPE char4,
     status      TYPE char1,
-    status_icon TYPE icon_d,
+    status_icon TYPE char4,
   END OF gty_kpi_summary,
 
-  gty_kpi_summaries TYPE STANDARD TABLE OF gty_kpi_summary WITH EMPTY KEY.
+  gty_kpi_summaries TYPE STANDARD TABLE OF gty_kpi_summary WITH DEFAULT KEY.
 
 TYPES:
   BEGIN OF gty_movement_kpi,
-    lgnum           TYPE lgnum,
-    bwlvs           TYPE bwlvs,
-    bwlvs_txt       TYPE t333t-btext,
+    lgnum           TYPE char3,
+    bwlvs           TYPE char3,
+    bwlvs_txt       TYPE char40,
     to_count        TYPE i,
     to_confirmed    TYPE i,
     to_open         TYPE i,
@@ -141,31 +141,31 @@ TYPES:
     max_time_hours  TYPE p LENGTH 7 DECIMALS 2,
     total_qty       TYPE p LENGTH 15 DECIMALS 3,
     status          TYPE char1,
-    status_icon     TYPE icon_d,
+    status_icon     TYPE char4,
   END OF gty_movement_kpi,
 
-  gty_movement_kpis TYPE STANDARD TABLE OF gty_movement_kpi WITH KEY lgnum bwlvs.
+  gty_movement_kpis TYPE STANDARD TABLE OF gty_movement_kpi WITH DEFAULT KEY.
 
 *----------------------------------------------------------------------*
-* Types - Workload Analysis
+* Types - Workload Analysis (primitive types only)
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_workload,
-    lgnum       TYPE lgnum,
-    date        TYPE sydatum,
-    hour        TYPE i,
-    to_created  TYPE i,
+    lgnum        TYPE char3,
+    date         TYPE sydatum,
+    hour         TYPE i,
+    to_created   TYPE i,
     to_confirmed TYPE i,
-    to_open     TYPE i,
-    items_moved TYPE p LENGTH 15 DECIMALS 3,
-    peak_flag   TYPE char1,
+    to_open      TYPE i,
+    items_moved  TYPE p LENGTH 15 DECIMALS 3,
+    peak_flag    TYPE char1,
   END OF gty_workload,
 
-  gty_workloads TYPE STANDARD TABLE OF gty_workload WITH KEY lgnum date hour.
+  gty_workloads TYPE STANDARD TABLE OF gty_workload WITH DEFAULT KEY.
 
 TYPES:
   BEGIN OF gty_user_workload,
-    lgnum           TYPE lgnum,
+    lgnum           TYPE char3,
     pession         TYPE char12,
     user_name       TYPE char80,
     to_confirmed    TYPE i,
@@ -174,16 +174,16 @@ TYPES:
     efficiency      TYPE p LENGTH 5 DECIMALS 2,
   END OF gty_user_workload,
 
-  gty_user_workloads TYPE STANDARD TABLE OF gty_user_workload WITH KEY lgnum pession.
+  gty_user_workloads TYPE STANDARD TABLE OF gty_user_workload WITH DEFAULT KEY.
 
 *----------------------------------------------------------------------*
-* Types - Storage Type Summary
+* Types - Storage Type Summary (primitive types only)
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_storage_type_sum,
-    lgnum         TYPE lgnum,
-    lgtyp         TYPE lgtyp,
-    lgtyp_txt     TYPE t301t-ltypt,
+    lgnum         TYPE char3,
+    lgtyp         TYPE char3,
+    lgtyp_txt     TYPE char25,
     total_bins    TYPE i,
     occupied_bins TYPE i,
     empty_bins    TYPE i,
@@ -191,42 +191,42 @@ TYPES:
     total_quants  TYPE i,
     occupancy_pct TYPE p LENGTH 5 DECIMALS 2,
     status        TYPE char1,
-    status_icon   TYPE icon_d,
-    bar_graph     TYPE char50,  " ASCII progress bar
+    status_icon   TYPE char4,
+    bar_graph     TYPE char50,
   END OF gty_storage_type_sum,
 
-  gty_storage_type_sums TYPE STANDARD TABLE OF gty_storage_type_sum WITH KEY lgnum lgtyp.
+  gty_storage_type_sums TYPE STANDARD TABLE OF gty_storage_type_sum WITH DEFAULT KEY.
 
 *----------------------------------------------------------------------*
-* Types - Movement Simulation
+* Types - Movement Simulation (primitive types only)
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_movement_sim,
-    lgnum         TYPE lgnum,
-    tanum         TYPE tanum,
-    tapos         TYPE tapos,
-    matnr         TYPE matnr,
-    maktx         TYPE maktx,
-    vsolm         TYPE menge_d,
-    meins         TYPE meins,
-    vltyp         TYPE vltyp,
-    vlpla         TYPE vlpla,
-    nltyp         TYPE nltyp,
-    nlpla         TYPE nlpla,
+    lgnum         TYPE char3,
+    tanum         TYPE char10,
+    tapos         TYPE numc4,
+    matnr         TYPE char18,
+    maktx         TYPE char40,
+    vsolm         TYPE p LENGTH 13 DECIMALS 3,
+    meins         TYPE char3,
+    vltyp         TYPE char3,
+    vlpla         TYPE char10,
+    nltyp         TYPE char3,
+    nlpla         TYPE char10,
     bdatu         TYPE sydatum,
     bupts         TYPE syuzeit,
     timestamp     TYPE timestamp,
-    direction     TYPE char30,    " Arrow representation
+    direction     TYPE char30,
   END OF gty_movement_sim,
 
-  gty_movement_sims TYPE STANDARD TABLE OF gty_movement_sim WITH KEY timestamp lgnum tanum tapos.
+  gty_movement_sims TYPE STANDARD TABLE OF gty_movement_sim WITH DEFAULT KEY.
 
 *----------------------------------------------------------------------*
-* Types - Daily Statistics
+* Types - Daily Statistics (primitive types only)
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_daily_stat,
-    lgnum           TYPE lgnum,
+    lgnum           TYPE char3,
     date            TYPE sydatum,
     day_name        TYPE char10,
     to_created      TYPE i,
@@ -238,39 +238,39 @@ TYPES:
     bar_confirmed   TYPE char30,
   END OF gty_daily_stat,
 
-  gty_daily_stats TYPE STANDARD TABLE OF gty_daily_stat WITH KEY lgnum date.
+  gty_daily_stats TYPE STANDARD TABLE OF gty_daily_stat WITH DEFAULT KEY.
 
 *----------------------------------------------------------------------*
-* Types - Aging Analysis
+* Types - Aging Analysis (primitive types only)
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_aging,
-    lgnum       TYPE lgnum,
+    lgnum       TYPE char3,
     age_bucket  TYPE char20,
     to_count    TYPE i,
     percentage  TYPE p LENGTH 5 DECIMALS 2,
     bar_graph   TYPE char40,
   END OF gty_aging,
 
-  gty_agings TYPE STANDARD TABLE OF gty_aging WITH KEY lgnum age_bucket.
+  gty_agings TYPE STANDARD TABLE OF gty_aging WITH DEFAULT KEY.
 
 *----------------------------------------------------------------------*
-* Types - Material Flow
+* Types - Material Flow (primitive types only)
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_material_flow,
-    lgnum       TYPE lgnum,
-    matnr       TYPE matnr,
-    maktx       TYPE maktx,
+    lgnum       TYPE char3,
+    matnr       TYPE char18,
+    maktx       TYPE char40,
     movements   TYPE i,
     total_qty   TYPE p LENGTH 15 DECIMALS 3,
-    meins       TYPE meins,
+    meins       TYPE char3,
     inbound     TYPE i,
     outbound    TYPE i,
     internal    TYPE i,
   END OF gty_material_flow,
 
-  gty_material_flows TYPE STANDARD TABLE OF gty_material_flow WITH KEY lgnum matnr.
+  gty_material_flows TYPE STANDARD TABLE OF gty_material_flow WITH DEFAULT KEY.
 
 *----------------------------------------------------------------------*
 * Global Variables - Data
@@ -317,15 +317,15 @@ DATA:
 * Global Variables - Dashboard Metrics
 *----------------------------------------------------------------------*
 DATA:
-  gv_total_bins       TYPE i,
-  gv_occupied_bins    TYPE i,
-  gv_empty_bins       TYPE i,
-  gv_blocked_bins     TYPE i,
-  gv_total_to         TYPE i,
-  gv_open_to          TYPE i,
-  gv_confirmed_to     TYPE i,
-  gv_avg_confirm_time TYPE p LENGTH 7 DECIMALS 2,
-  gv_total_quants     TYPE i,
+  gv_total_bins        TYPE i,
+  gv_occupied_bins     TYPE i,
+  gv_empty_bins        TYPE i,
+  gv_blocked_bins      TYPE i,
+  gv_total_to          TYPE i,
+  gv_open_to           TYPE i,
+  gv_confirmed_to      TYPE i,
+  gv_avg_confirm_time  TYPE p LENGTH 7 DECIMALS 2,
+  gv_total_quants      TYPE i,
   gv_overall_occupancy TYPE p LENGTH 5 DECIMALS 2.
 
 *----------------------------------------------------------------------*
