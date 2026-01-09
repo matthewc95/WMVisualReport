@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+ <asx:values>
+  <PROGDIR>
+   <NAME>ZWM_VISUAL_REPORT_PBO</NAME>
+   <STATE>A</STATE>
+   <FIXPT>X</FIXPT>
+   <DBAPL>S</DBAPL>
+   <DBNA>D$</DBNA>
+   <SUBC>I</SUBC>
+   <RSTAT>K</RSTAT>
+   <RLOAD>E</RLOAD>
+   <UCCHECK>X</UCCHECK>
+  </PROGDIR>
+ </asx:values>
+</asx:abap>

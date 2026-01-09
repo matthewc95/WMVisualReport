@@ -1,0 +1,21 @@
+B01	Warehouse Selection
+B02	Date Range for Transfer Orders
+B03	Material and Movement Filter
+B04	Display Mode
+B05	Additional Options
+P_DATFR	Date From
+P_DATTO	Date To
+P_HTML	HTML Dashboard Mode
+P_MAX	Max Records
+P_TEST	Generate Test Data
+RB_BINS	Storage Bins
+RB_KPI	KPI Statistics
+RB_OVER	Overview Dashboard
+RB_SIM	Movement Simulation
+RB_TO	Transfer Orders
+RB_WORK	Workload Analysis
+S_BWLVS	Movement Type
+S_LGNUM	Warehouse Number
+S_LGPLA	Storage Bin
+S_LGTYP	Storage Type
+S_MATNR	Material

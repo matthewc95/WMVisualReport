@@ -1,0 +1,21 @@
+B01	Selezione Magazzino
+B02	Intervallo Date Ordini di Trasferimento
+B03	Filtro Materiale e Tipo Movimento
+B04	Modalità Visualizzazione
+B05	Opzioni Aggiuntive
+P_DATFR	Data Da
+P_DATTO	Data A
+P_HTML	Modalità Dashboard HTML
+P_MAX	Max Record
+P_TEST	Genera Dati di Test
+RB_BINS	Ubicazioni
+RB_KPI	Statistiche KPI
+RB_OVER	Dashboard Panoramica
+RB_SIM	Simulazione Movimenti
+RB_TO	Ordini di Trasferimento
+RB_WORK	Analisi Carichi di Lavoro
+S_BWLVS	Tipo Movimento
+S_LGNUM	Numero Magazzino
+S_LGPLA	Ubicazione
+S_LGTYP	Tipo Deposito
+S_MATNR	Materiale
