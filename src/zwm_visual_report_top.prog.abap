@@ -60,13 +60,13 @@ TYPES:
     lgtyp       TYPE lgtyp,         " Storage Type
     lgpla       TYPE lgpla,         " Storage Bin
     lgber       TYPE lgber,         " Storage Section
-    lptyp       TYPE lptyp,         " Bin Type
-    maxgew      TYPE lmaxg,         " Maximum Weight
-    maxle       TYPE lmaxl,         " Maximum Capacity
-    anzle       TYPE lanzl,         " Current LE count
-    verme       TYPE lqua-verme,    " Available quantity
-    gesme       TYPE lqua-gesme,    " Total quantity
-    einme       TYPE lqua-einme,    " Unit of entry
+    lptyp       TYPE char4,         " Bin Type
+    maxgew      TYPE p LENGTH 10 DECIMALS 3, " Maximum Weight
+    maxle       TYPE i,             " Maximum Capacity
+    anzle       TYPE i,             " Current LE count
+    verme       TYPE menge_d,       " Available quantity
+    gesme       TYPE menge_d,       " Total quantity
+    einme       TYPE meins,         " Unit of entry
     occupancy   TYPE p LENGTH 5 DECIMALS 2, " Occupancy %
     status      TYPE char1,         " Status indicator
     status_icon TYPE icon_d,        " Icon for display

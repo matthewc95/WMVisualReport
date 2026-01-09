@@ -170,7 +170,7 @@ CLASS lcl_data_extractor DEFINITION FINAL.
         RETURNING VALUE(rt_orders) TYPE gty_transfer_orders,
 
       extract_quants
-        RETURNING VALUE(rt_quants) TYPE lqua_t,
+        RETURNING VALUE(rt_quants) TYPE STANDARD TABLE OF lqua,
 
       get_storage_type_summary
         RETURNING VALUE(rt_summary) TYPE gty_storage_type_sums,
@@ -242,10 +242,10 @@ CLASS lcl_data_extractor IMPLEMENTATION.
           lt_lqua  TYPE STANDARD TABLE OF lqua,
           ls_bin   TYPE gty_storage_bin.
 
-    " Extract storage bins
-    SELECT lgnum, lgtyp, lgpla, lgber, lptyp, maxgew, maxle, anzle, skession
+    " Extract storage bins - use only guaranteed fields
+    SELECT lgnum, lgtyp, lgpla, lgber, kession
       FROM lagp
-      INTO TABLE @lt_lagp
+      INTO CORRESPONDING FIELDS OF TABLE @lt_lagp
       WHERE lgnum IN @mt_lgnum
         AND lgtyp IN @mt_lgtyp
         AND lgpla IN @mt_lgpla
@@ -269,11 +269,7 @@ CLASS lcl_data_extractor IMPLEMENTATION.
       ls_bin-lgtyp = ls_lagp-lgtyp.
       ls_bin-lgpla = ls_lagp-lgpla.
       ls_bin-lgber = ls_lagp-lgber.
-      ls_bin-lptyp = ls_lagp-lptyp.
-      ls_bin-maxgew = ls_lagp-maxgew.
-      ls_bin-maxle  = ls_lagp-maxle.
-      ls_bin-anzle  = ls_lagp-anzle.
-      ls_bin-blocked = COND #( WHEN ls_lagp-skession IS NOT INITIAL THEN abap_true ).
+      ls_bin-blocked = COND #( WHEN ls_lagp-kession IS NOT INITIAL THEN abap_true ).
 
       " Calculate quant data for this bin
       LOOP AT lt_lqua INTO DATA(ls_lqua)
@@ -292,11 +288,11 @@ CLASS lcl_data_extractor IMPLEMENTATION.
         ENDIF.
       ENDLOOP.
 
-      " Calculate occupancy
-      IF ls_bin-maxle > 0.
-        ls_bin-occupancy = ( ls_bin-anzle / ls_bin-maxle ) * 100.
-      ELSEIF ls_bin-quant_count > 0.
-        ls_bin-occupancy = 100.  " If has quants but no max defined
+      " Calculate occupancy based on quant presence
+      IF ls_bin-quant_count > 0.
+        ls_bin-occupancy = 100.  " Bin is occupied if it has quants
+      ELSE.
+        ls_bin-occupancy = 0.    " Bin is empty
       ENDIF.
 
       " Determine status
