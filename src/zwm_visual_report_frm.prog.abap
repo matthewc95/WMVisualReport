@@ -531,8 +531,9 @@ FORM print_report.
   NEW-PAGE PRINT ON NO DIALOG.
 
   " Re-display current view for printing
-  DATA(lo_controller) = lcl_controller=>get_instance( ).
-  lo_controller->display_overview( ).
+  DATA: lo_ctrl TYPE REF TO lcl_controller.
+  lo_ctrl = lcl_controller=>get_instance( ).
+  lo_ctrl->display_overview( ).
 
   NEW-PAGE PRINT OFF.
 
