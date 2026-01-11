@@ -19,6 +19,132 @@
     <ENTRY>SAP WM Visual Monitoring Dashboard</ENTRY>
     <LENGTH>35</LENGTH>
    </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B01</KEY>
+    <ENTRY>Warehouse Selection</ENTRY>
+    <LENGTH>19</LENGTH>
+   </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B02</KEY>
+    <ENTRY>Date Range for Transfer Orders</ENTRY>
+    <LENGTH>30</LENGTH>
+   </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B03</KEY>
+    <ENTRY>Material and Movement Filter</ENTRY>
+    <LENGTH>28</LENGTH>
+   </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B04</KEY>
+    <ENTRY>Display Mode</ENTRY>
+    <LENGTH>12</LENGTH>
+   </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B05</KEY>
+    <ENTRY>Additional Options</ENTRY>
+    <LENGTH>18</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_DATFR</KEY>
+    <ENTRY>        Date From</ENTRY>
+    <LENGTH>17</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_DATTO</KEY>
+    <ENTRY>        Date To</ENTRY>
+    <LENGTH>15</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_HTML</KEY>
+    <ENTRY>        HTML Dashboard Mode</ENTRY>
+    <LENGTH>24</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_MAX</KEY>
+    <ENTRY>        Max Records</ENTRY>
+    <LENGTH>19</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_TEST</KEY>
+    <ENTRY>        Generate Test Data</ENTRY>
+    <LENGTH>23</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_BINS</KEY>
+    <ENTRY>        Storage Bins</ENTRY>
+    <LENGTH>20</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_KPI</KEY>
+    <ENTRY>        KPI Statistics</ENTRY>
+    <LENGTH>22</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_OVER</KEY>
+    <ENTRY>        Overview Dashboard</ENTRY>
+    <LENGTH>26</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_SIM</KEY>
+    <ENTRY>        Movement Simulation</ENTRY>
+    <LENGTH>27</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_TO</KEY>
+    <ENTRY>        Transfer Orders</ENTRY>
+    <LENGTH>23</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_WORK</KEY>
+    <ENTRY>        Workload Analysis</ENTRY>
+    <LENGTH>25</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_BWLVS</KEY>
+    <ENTRY>D       Movement Type</ENTRY>
+    <LENGTH>21</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_LGNUM</KEY>
+    <ENTRY>D       Warehouse Number</ENTRY>
+    <LENGTH>24</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_LGPLA</KEY>
+    <ENTRY>D       Storage Bin</ENTRY>
+    <LENGTH>19</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_LGTYP</KEY>
+    <ENTRY>D       Storage Type</ENTRY>
+    <LENGTH>20</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_MATNR</KEY>
+    <ENTRY>D       Material</ENTRY>
+    <LENGTH>16</LENGTH>
+   </item>
   </TPOOL>
  </asx:values>
 </asx:abap>
