@@ -48,8 +48,9 @@ MODULE init_html_viewer OUTPUT.
 
   " Load HTML content
   IF gv_data_loaded = abap_true.
-    DATA(lo_controller) = lcl_controller=>get_instance( ).
-    lv_html = lo_controller->get_dashboard_html( ).
+    DATA: lo_controller1 TYPE REF TO lcl_controller.
+    lo_controller1 = lcl_controller=>get_instance( ).
+    lv_html = lo_controller1->get_dashboard_html( ).
 
     " Convert to internal table for HTML viewer
     DATA: lt_html TYPE STANDARD TABLE OF char255,
@@ -90,7 +91,8 @@ MODULE display_alv OUTPUT.
 
   " Display ALV based on active tab
   IF gv_data_loaded = abap_true.
-    DATA(lo_controller) = lcl_controller=>get_instance( ).
-    lo_controller->display_by_tab( gv_active_tab ).
+    DATA: lo_controller2 TYPE REF TO lcl_controller.
+    lo_controller2 = lcl_controller=>get_instance( ).
+    lo_controller2->display_by_tab( gv_active_tab ).
   ENDIF.
 ENDMODULE.

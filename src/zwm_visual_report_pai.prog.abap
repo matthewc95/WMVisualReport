@@ -19,8 +19,9 @@ MODULE user_command_0100 INPUT.
 
     WHEN 'REFRESH'.
       " Refresh data
-      DATA(lo_controller) = lcl_controller=>get_instance( ).
-      lo_controller->refresh_data( ).
+      DATA: lo_ctrl TYPE REF TO lcl_controller.
+      lo_ctrl = lcl_controller=>get_instance( ).
+      lo_ctrl->refresh_data( ).
       MESSAGE 'Data refreshed successfully' TYPE 'S'.
 
     WHEN 'TAB1'.  " Overview
