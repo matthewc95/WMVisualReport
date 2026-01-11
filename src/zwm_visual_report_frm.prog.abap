@@ -101,9 +101,9 @@ FORM f4_storage_bin.
   SELECT lgnum lgtyp lgpla
     FROM lagp
     INTO CORRESPONDING FIELDS OF TABLE lt_lagp
+    UP TO 1000 ROWS
     WHERE lgnum IN s_lgnum
-      AND lgtyp IN s_lgtyp
-    UP TO 1000 ROWS.
+      AND lgtyp IN s_lgtyp.
 
   IF lt_lagp IS NOT INITIAL.
     CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
