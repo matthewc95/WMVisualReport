@@ -29,7 +29,7 @@ SELECTION-SCREEN END OF BLOCK b2.
 SELECTION-SCREEN BEGIN OF BLOCK b3 WITH FRAME TITLE TEXT-b03.
   SELECT-OPTIONS:
     s_matnr FOR lqua-matnr,                " Material Number
-    s_bwlvs FOR ltap-bwlvs.                " Movement Type
+    s_bwlvs FOR ltak-bwlvs.                " Movement Type
 SELECTION-SCREEN END OF BLOCK b3.
 
 *----------------------------------------------------------------------*
