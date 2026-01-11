@@ -247,24 +247,24 @@ CLASS lcl_data_extractor IMPLEMENTATION.
           ls_bin   TYPE gty_storage_bin.
 
     " Extract storage bins with all relevant fields
-    SELECT lgnum, lgtyp, lgpla, lgber, lptyp, maxle, anzle,
-           skzua, skzue, skzsa, skzse, skzsi
+    SELECT lgnum lgtyp lgpla lgber lptyp maxle anzle
+           skzua skzue skzsa skzse skzsi
       FROM lagp
-      INTO CORRESPONDING FIELDS OF TABLE @lt_lagp
-      WHERE lgnum IN @mt_lgnum
-        AND lgtyp IN @mt_lgtyp
-        AND lgpla IN @mt_lgpla
-      UP TO @gc_max_records ROWS.
+      INTO CORRESPONDING FIELDS OF TABLE lt_lagp
+      UP TO gc_max_records ROWS
+      WHERE lgnum IN mt_lgnum
+        AND lgtyp IN mt_lgtyp
+        AND lgpla IN mt_lgpla.
 
     " Extract quants for quantity calculation
     IF lt_lagp IS NOT INITIAL.
-      SELECT lgnum, lgtyp, lgpla, matnr, verme, gesme, meins
+      SELECT lgnum lgtyp lgpla matnr verme gesme meins
         FROM lqua
-        INTO CORRESPONDING FIELDS OF TABLE @lt_lqua
-        FOR ALL ENTRIES IN @lt_lagp
-        WHERE lgnum = @lt_lagp-lgnum
-          AND lgtyp = @lt_lagp-lgtyp
-          AND lgpla = @lt_lagp-lgpla.
+        INTO CORRESPONDING FIELDS OF TABLE lt_lqua
+        FOR ALL ENTRIES IN lt_lagp
+        WHERE lgnum = lt_lagp-lgnum
+          AND lgtyp = lt_lagp-lgtyp
+          AND lgpla = lt_lagp-lgpla.
     ENDIF.
 
     " Process bins
@@ -362,18 +362,18 @@ CLASS lcl_data_extractor IMPLEMENTATION.
 
     " Join LTAK (header) and LTAP (items) to get all required fields
     " BWLVS, BDATU, BZEIT are in LTAK; confirmation fields QDATU, QZEIT, QNAME are in LTAP
-    SELECT ltak~lgnum, ltak~tanum, ltak~bwlvs, ltak~refnr, ltak~bdatu, ltak~bzeit,
-           ltap~tapos, ltap~vltyp, ltap~vlpla, ltap~nltyp, ltap~nlpla,
-           ltap~matnr, ltap~werks, ltap~maktx, ltap~vsolm, ltap~meins,
-           ltap~qdatu, ltap~qzeit, ltap~qname
+    SELECT ltak~lgnum ltak~tanum ltak~bwlvs ltak~refnr ltak~bdatu ltak~bzeit
+           ltap~tapos ltap~vltyp ltap~vlpla ltap~nltyp ltap~nlpla
+           ltap~matnr ltap~werks ltap~maktx ltap~vsolm ltap~meins
+           ltap~qdatu ltap~qzeit ltap~qname
+      INTO CORRESPONDING FIELDS OF TABLE lt_to_data
+      UP TO gc_max_records ROWS
       FROM ltak
       INNER JOIN ltap ON ltak~lgnum = ltap~lgnum AND ltak~tanum = ltap~tanum
-      INTO TABLE @lt_to_data
-      WHERE ltak~lgnum IN @mt_lgnum
-        AND ltak~bwlvs IN @mt_bwlvs
-        AND ltap~matnr IN @mt_matnr
-        AND ltak~bdatu BETWEEN @mv_date_from AND @mv_date_to
-      UP TO @gc_max_records ROWS.
+      WHERE ltak~lgnum IN mt_lgnum
+        AND ltak~bwlvs IN mt_bwlvs
+        AND ltap~matnr IN mt_matnr
+        AND ltak~bdatu BETWEEN mv_date_from AND mv_date_to.
 
     " Process TOs
     LOOP AT lt_to_data INTO DATA(ls_data).
@@ -914,9 +914,9 @@ CLASS lcl_data_extractor IMPLEMENTATION.
   METHOD get_movement_type_text.
     SELECT SINGLE btext
       FROM t333t
-      INTO @rv_text
-      WHERE spras = @sy-langu
-        AND bwlvs = @iv_bwlvs.
+      INTO rv_text
+      WHERE spras = sy-langu
+        AND bwlvs = iv_bwlvs.
     IF sy-subrc <> 0.
       rv_text = iv_bwlvs.
     ENDIF.
@@ -925,18 +925,18 @@ CLASS lcl_data_extractor IMPLEMENTATION.
   METHOD get_material_description.
     SELECT SINGLE maktx
       FROM makt
-      INTO @rv_text
-      WHERE matnr = @iv_matnr
-        AND spras = @sy-langu.
+      INTO rv_text
+      WHERE matnr = iv_matnr
+        AND spras = sy-langu.
   ENDMETHOD.
 
   METHOD get_storage_type_text.
     SELECT SINGLE ltypt
       FROM t301t
-      INTO @rv_text
-      WHERE lgnum = @iv_lgnum
-        AND lgtyp = @iv_lgtyp
-        AND spras = @sy-langu.
+      INTO rv_text
+      WHERE lgnum = iv_lgnum
+        AND lgtyp = iv_lgtyp
+        AND spras = sy-langu.
     IF sy-subrc <> 0.
       rv_text = iv_lgtyp.
     ENDIF.
