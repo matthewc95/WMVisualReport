@@ -116,7 +116,7 @@ TYPES:
 *----------------------------------------------------------------------*
 TYPES:
   BEGIN OF gty_kpi_summary,
-    description TYPE char60,
+    description TYPE char70,
     value       TYPE char30,
     unit        TYPE char10,
     trend       TYPE char1,           " U=Up, D=Down, S=Stable
@@ -182,7 +182,7 @@ TYPES:
   BEGIN OF gty_storage_type_sum,
     lgnum         TYPE lagp-lgnum,
     lgtyp         TYPE lagp-lgtyp,
-    lgtyp_txt     TYPE char25,
+    lgtyp_txt     TYPE char30,
     total_bins    TYPE i,
     occupied_bins TYPE i,
     empty_bins    TYPE i,

@@ -222,7 +222,7 @@ CLASS lcl_data_extractor DEFINITION FINAL.
       get_storage_type_text
         IMPORTING iv_lgnum       TYPE lagp-lgnum
                   iv_lgtyp       TYPE lagp-lgtyp
-        RETURNING VALUE(rv_text) TYPE char25.
+        RETURNING VALUE(rv_text) TYPE char30.
 
 ENDCLASS.
 
