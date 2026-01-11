@@ -66,9 +66,10 @@ MODULE init_html_viewer OUTPUT.
     ENDWHILE.
 
     " Load HTML
+    DATA: lv_url TYPE char255.
     go_html_viewer->load_data(
       IMPORTING
-        assigned_url = DATA(lv_url)
+        assigned_url = lv_url
       CHANGING
         data_table   = lt_html ).
 

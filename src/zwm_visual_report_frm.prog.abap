@@ -58,10 +58,10 @@ FORM f4_storage_type.
 
   " Get storage types for selected warehouse
   IF s_lgnum[] IS NOT INITIAL.
-    SELECT lgnum, lgtyp
+    SELECT lgnum lgtyp
       FROM t301
-      INTO TABLE @lt_t301
-      WHERE lgnum IN @s_lgnum.
+      INTO CORRESPONDING FIELDS OF TABLE lt_t301
+      WHERE lgnum IN s_lgnum.
 
     CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
       EXPORTING
@@ -98,11 +98,11 @@ FORM f4_storage_bin.
         lt_lagp   TYPE STANDARD TABLE OF lagp.
 
   " Get storage bins for selected warehouse/type
-  SELECT lgnum, lgtyp, lgpla
+  SELECT lgnum lgtyp lgpla
     FROM lagp
-    INTO CORRESPONDING FIELDS OF TABLE @lt_lagp
-    WHERE lgnum IN @s_lgnum
-      AND lgtyp IN @s_lgtyp
+    INTO CORRESPONDING FIELDS OF TABLE lt_lagp
+    WHERE lgnum IN s_lgnum
+      AND lgtyp IN s_lgtyp
     UP TO 1000 ROWS.
 
   IF lt_lagp IS NOT INITIAL.
