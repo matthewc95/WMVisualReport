@@ -13,11 +13,11 @@ CLASS lcl_utilities DEFINITION FINAL.
       " Conversion methods
       get_status_icon
         IMPORTING iv_status       TYPE char1
-        RETURNING VALUE(rv_icon)  TYPE icon_d,
+        RETURNING VALUE(rv_icon)  TYPE char4,
 
       get_trend_icon
         IMPORTING iv_trend        TYPE char1
-        RETURNING VALUE(rv_icon)  TYPE icon_d,
+        RETURNING VALUE(rv_icon)  TYPE char4,
 
       get_color_code
         IMPORTING iv_status       TYPE char1
@@ -152,14 +152,21 @@ ENDCLASS.
 *----------------------------------------------------------------------*
 CLASS lcl_data_extractor DEFINITION FINAL.
   PUBLIC SECTION.
+    " Range types using actual table field types
+    TYPES: gty_r_lgnum TYPE RANGE OF lagp-lgnum,
+           gty_r_lgtyp TYPE RANGE OF lagp-lgtyp,
+           gty_r_lgpla TYPE RANGE OF lagp-lgpla,
+           gty_r_matnr TYPE RANGE OF lqua-matnr,
+           gty_r_bwlvs TYPE RANGE OF ltak-bwlvs.
+
     METHODS:
       constructor
         IMPORTING
-          it_lgnum TYPE RANGE OF lgnum
-          it_lgtyp TYPE RANGE OF lgtyp
-          it_lgpla TYPE RANGE OF lgpla
-          it_matnr TYPE RANGE OF matnr
-          it_bwlvs TYPE RANGE OF bwlvs
+          it_lgnum TYPE gty_r_lgnum
+          it_lgtyp TYPE gty_r_lgtyp
+          it_lgpla TYPE gty_r_lgpla
+          it_matnr TYPE gty_r_matnr
+          it_bwlvs TYPE gty_r_bwlvs
           iv_date_from TYPE sydatum
           iv_date_to   TYPE sydatum,
 
@@ -168,9 +175,6 @@ CLASS lcl_data_extractor DEFINITION FINAL.
 
       extract_transfer_orders
         RETURNING VALUE(rt_orders) TYPE gty_transfer_orders,
-
-      extract_quants
-        RETURNING VALUE(rt_quants) TYPE STANDARD TABLE OF lqua,
 
       get_storage_type_summary
         RETURNING VALUE(rt_summary) TYPE gty_storage_type_sums,
@@ -198,27 +202,27 @@ CLASS lcl_data_extractor DEFINITION FINAL.
 
   PRIVATE SECTION.
     DATA:
-      mt_lgnum     TYPE RANGE OF lgnum,
-      mt_lgtyp     TYPE RANGE OF lgtyp,
-      mt_lgpla     TYPE RANGE OF lgpla,
-      mt_matnr     TYPE RANGE OF matnr,
-      mt_bwlvs     TYPE RANGE OF bwlvs,
+      mt_lgnum     TYPE gty_r_lgnum,
+      mt_lgtyp     TYPE gty_r_lgtyp,
+      mt_lgpla     TYPE gty_r_lgpla,
+      mt_matnr     TYPE gty_r_matnr,
+      mt_bwlvs     TYPE gty_r_bwlvs,
       mv_date_from TYPE sydatum,
       mv_date_to   TYPE sydatum.
 
     METHODS:
       get_movement_type_text
-        IMPORTING iv_bwlvs       TYPE bwlvs
-        RETURNING VALUE(rv_text) TYPE t333t-btext,
+        IMPORTING iv_bwlvs       TYPE ltak-bwlvs
+        RETURNING VALUE(rv_text) TYPE char40,
 
       get_material_description
-        IMPORTING iv_matnr       TYPE matnr
-        RETURNING VALUE(rv_text) TYPE maktx,
+        IMPORTING iv_matnr       TYPE lqua-matnr
+        RETURNING VALUE(rv_text) TYPE char40,
 
       get_storage_type_text
-        IMPORTING iv_lgnum       TYPE lgnum
-                  iv_lgtyp       TYPE lgtyp
-        RETURNING VALUE(rv_text) TYPE t301t-ltypt.
+        IMPORTING iv_lgnum       TYPE lagp-lgnum
+                  iv_lgtyp       TYPE lagp-lgtyp
+        RETURNING VALUE(rv_text) TYPE char25.
 
 ENDCLASS.
 
@@ -242,8 +246,9 @@ CLASS lcl_data_extractor IMPLEMENTATION.
           lt_lqua  TYPE STANDARD TABLE OF lqua,
           ls_bin   TYPE gty_storage_bin.
 
-    " Extract storage bins - use only guaranteed fields
-    SELECT lgnum, lgtyp, lgpla, lgber, kession
+    " Extract storage bins with all relevant fields
+    SELECT lgnum, lgtyp, lgpla, lgber, lptyp, maxle, anzle,
+           skzua, skzue, skzsa, skzse, skzsi
       FROM lagp
       INTO CORRESPONDING FIELDS OF TABLE @lt_lagp
       WHERE lgnum IN @mt_lgnum
@@ -253,9 +258,9 @@ CLASS lcl_data_extractor IMPLEMENTATION.
 
     " Extract quants for quantity calculation
     IF lt_lagp IS NOT INITIAL.
-      SELECT lgnum, lgtyp, lgpla, matnr, verme, gesme, einme
+      SELECT lgnum, lgtyp, lgpla, matnr, verme, gesme, meins
         FROM lqua
-        INTO TABLE @lt_lqua
+        INTO CORRESPONDING FIELDS OF TABLE @lt_lqua
         FOR ALL ENTRIES IN @lt_lagp
         WHERE lgnum = @lt_lagp-lgnum
           AND lgtyp = @lt_lagp-lgtyp
@@ -265,11 +270,22 @@ CLASS lcl_data_extractor IMPLEMENTATION.
     " Process bins
     LOOP AT lt_lagp INTO DATA(ls_lagp).
       CLEAR ls_bin.
-      ls_bin-lgnum = ls_lagp-lgnum.
-      ls_bin-lgtyp = ls_lagp-lgtyp.
-      ls_bin-lgpla = ls_lagp-lgpla.
-      ls_bin-lgber = ls_lagp-lgber.
-      ls_bin-blocked = COND #( WHEN ls_lagp-kession IS NOT INITIAL THEN abap_true ).
+      ls_bin-lgnum  = ls_lagp-lgnum.
+      ls_bin-lgtyp  = ls_lagp-lgtyp.
+      ls_bin-lgpla  = ls_lagp-lgpla.
+      ls_bin-lgber  = ls_lagp-lgber.
+      ls_bin-lptyp  = ls_lagp-lptyp.
+      ls_bin-maxle  = ls_lagp-maxle.
+      ls_bin-anzle  = ls_lagp-anzle.
+
+      " Check if bin is blocked (any block indicator set)
+      IF ls_lagp-skzua IS NOT INITIAL OR
+         ls_lagp-skzue IS NOT INITIAL OR
+         ls_lagp-skzsa IS NOT INITIAL OR
+         ls_lagp-skzse IS NOT INITIAL OR
+         ls_lagp-skzsi IS NOT INITIAL.
+        ls_bin-blocked = abap_true.
+      ENDIF.
 
       " Calculate quant data for this bin
       LOOP AT lt_lqua INTO DATA(ls_lqua)
@@ -282,15 +298,17 @@ CLASS lcl_data_extractor IMPLEMENTATION.
         ls_bin-quant_count = ls_bin-quant_count + 1.
         IF ls_bin-matnr IS INITIAL.
           ls_bin-matnr = ls_lqua-matnr.
-          ls_bin-einme = ls_lqua-einme.
+          ls_bin-meins = ls_lqua-meins.
         ELSEIF ls_bin-matnr <> ls_lqua-matnr.
           ls_bin-mat_count = ls_bin-mat_count + 1.
         ENDIF.
       ENDLOOP.
 
-      " Calculate occupancy based on quant presence
-      IF ls_bin-quant_count > 0.
-        ls_bin-occupancy = 100.  " Bin is occupied if it has quants
+      " Calculate occupancy based on MAXLE if available, otherwise on quant presence
+      IF ls_bin-maxle > 0.
+        ls_bin-occupancy = ( ls_bin-anzle / ls_bin-maxle ) * 100.
+      ELSEIF ls_bin-quant_count > 0.
+        ls_bin-occupancy = 100.  " Bin has quants but no max defined
       ELSE.
         ls_bin-occupancy = 0.    " Bin is empty
       ENDIF.
@@ -313,54 +331,94 @@ CLASS lcl_data_extractor IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD extract_transfer_orders.
-    DATA: lt_ltap TYPE STANDARD TABLE OF ltap,
-          ls_to   TYPE gty_transfer_order.
+    DATA: ls_to TYPE gty_transfer_order.
 
-    " Extract TO items - use only guaranteed standard fields
-    SELECT lgnum, tanum, tapos, bwlvs,
-           vltyp, vlpla, nltyp, nlpla, matnr, werks,
-           vsolm, meins, bdatu, bupts, kdatu, kupts
-      FROM ltap
-      INTO CORRESPONDING FIELDS OF TABLE @lt_ltap
-      WHERE lgnum IN @mt_lgnum
-        AND bwlvs IN @mt_bwlvs
-        AND matnr IN @mt_matnr
-        AND bdatu BETWEEN @mv_date_from AND @mv_date_to
+    " Define work area structure for join result
+    TYPES: BEGIN OF lty_to_data,
+             " From LTAK (header)
+             lgnum TYPE ltak-lgnum,
+             tanum TYPE ltak-tanum,
+             bwlvs TYPE ltak-bwlvs,
+             refnr TYPE ltak-refnr,
+             bdatu TYPE ltak-bdatu,
+             bzeit TYPE ltak-bzeit,
+             " From LTAP (item)
+             tapos TYPE ltap-tapos,
+             vltyp TYPE ltap-vltyp,
+             vlpla TYPE ltap-vlpla,
+             nltyp TYPE ltap-nltyp,
+             nlpla TYPE ltap-nlpla,
+             matnr TYPE ltap-matnr,
+             werks TYPE ltap-werks,
+             maktx TYPE ltap-maktx,
+             vsolm TYPE ltap-vsolm,
+             meins TYPE ltap-meins,
+             qdatu TYPE ltap-qdatu,
+             qzeit TYPE ltap-qzeit,
+             qname TYPE ltap-qname,
+           END OF lty_to_data.
+
+    DATA: lt_to_data TYPE STANDARD TABLE OF lty_to_data.
+
+    " Join LTAK (header) and LTAP (items) to get all required fields
+    " BWLVS, BDATU, BZEIT are in LTAK; confirmation fields QDATU, QZEIT, QNAME are in LTAP
+    SELECT ltak~lgnum, ltak~tanum, ltak~bwlvs, ltak~refnr, ltak~bdatu, ltak~bzeit,
+           ltap~tapos, ltap~vltyp, ltap~vlpla, ltap~nltyp, ltap~nlpla,
+           ltap~matnr, ltap~werks, ltap~maktx, ltap~vsolm, ltap~meins,
+           ltap~qdatu, ltap~qzeit, ltap~qname
+      FROM ltak
+      INNER JOIN ltap ON ltak~lgnum = ltap~lgnum AND ltak~tanum = ltap~tanum
+      INTO TABLE @lt_to_data
+      WHERE ltak~lgnum IN @mt_lgnum
+        AND ltak~bwlvs IN @mt_bwlvs
+        AND ltap~matnr IN @mt_matnr
+        AND ltak~bdatu BETWEEN @mv_date_from AND @mv_date_to
       UP TO @gc_max_records ROWS.
 
     " Process TOs
-    LOOP AT lt_ltap INTO DATA(ls_ltap).
+    LOOP AT lt_to_data INTO DATA(ls_data).
       CLEAR ls_to.
 
-      ls_to-lgnum = ls_ltap-lgnum.
-      ls_to-tanum = ls_ltap-tanum.
-      ls_to-tapos = ls_ltap-tapos.
-      ls_to-bwlvs = ls_ltap-bwlvs.
-      ls_to-vltyp = ls_ltap-vltyp.
-      ls_to-vlpla = ls_ltap-vlpla.
-      ls_to-nltyp = ls_ltap-nltyp.
-      ls_to-nlpla = ls_ltap-nlpla.
-      ls_to-matnr = ls_ltap-matnr.
-      ls_to-werks = ls_ltap-werks.
-      ls_to-vsolm = ls_ltap-vsolm.
-      ls_to-meins = ls_ltap-meins.
-      ls_to-bdatu = ls_ltap-bdatu.
-      ls_to-bupts = ls_ltap-bupts.
-      ls_to-kdatu = ls_ltap-kdatu.
-      ls_to-kupts = ls_ltap-kupts.
+      " Header fields from LTAK
+      ls_to-lgnum = ls_data-lgnum.
+      ls_to-tanum = ls_data-tanum.
+      ls_to-bwlvs = ls_data-bwlvs.
+      ls_to-refnr = ls_data-refnr.
+      ls_to-bdatu = ls_data-bdatu.
+      ls_to-bzeit = ls_data-bzeit.
 
-      " Get material description
-      ls_to-maktx = get_material_description( ls_ltap-matnr ).
+      " Item fields from LTAP
+      ls_to-tapos = ls_data-tapos.
+      ls_to-vltyp = ls_data-vltyp.
+      ls_to-vlpla = ls_data-vlpla.
+      ls_to-nltyp = ls_data-nltyp.
+      ls_to-nlpla = ls_data-nlpla.
+      ls_to-matnr = ls_data-matnr.
+      ls_to-werks = ls_data-werks.
+      ls_to-vsolm = ls_data-vsolm.
+      ls_to-meins = ls_data-meins.
 
-      " Determine if confirmed
-      ls_to-confirmed = COND #( WHEN ls_ltap-kdatu IS NOT INITIAL THEN abap_true ).
+      " Confirmation fields from LTAP
+      ls_to-qdatu = ls_data-qdatu.
+      ls_to-qzeit = ls_data-qzeit.
+      ls_to-qname = ls_data-qname.
+
+      " Get material description (use from LTAP if available, otherwise fetch)
+      IF ls_data-maktx IS NOT INITIAL.
+        ls_to-maktx = ls_data-maktx.
+      ELSE.
+        ls_to-maktx = get_material_description( ls_data-matnr ).
+      ENDIF.
+
+      " Determine if confirmed (QDATU is confirmation date)
+      ls_to-confirmed = COND #( WHEN ls_data-qdatu IS NOT INITIAL THEN abap_true ).
 
       " Calculate waiting time
       ls_to-wait_hours = lcl_utilities=>calculate_hours_diff(
-        iv_date1 = ls_ltap-bdatu
-        iv_time1 = ls_ltap-bupts
-        iv_date2 = ls_ltap-kdatu
-        iv_time2 = ls_ltap-kupts ).
+        iv_date1 = ls_data-bdatu
+        iv_time1 = ls_data-bzeit
+        iv_date2 = ls_data-qdatu
+        iv_time2 = ls_data-qzeit ).
 
       " Set status
       IF ls_to-confirmed = abap_true.
@@ -387,18 +445,7 @@ CLASS lcl_data_extractor IMPLEMENTATION.
     ENDLOOP.
 
     " Sort by date/time descending (newest first)
-    SORT rt_orders BY bdatu DESCENDING bupts DESCENDING lgnum tanum tapos.
-  ENDMETHOD.
-
-  METHOD extract_quants.
-    SELECT *
-      FROM lqua
-      INTO TABLE @rt_quants
-      WHERE lgnum IN @mt_lgnum
-        AND lgtyp IN @mt_lgtyp
-        AND lgpla IN @mt_lgpla
-        AND matnr IN @mt_matnr
-      UP TO @gc_max_records ROWS.
+    SORT rt_orders BY bdatu DESCENDING bzeit DESCENDING lgnum tanum tapos.
   ENDMETHOD.
 
   METHOD get_storage_type_summary.
@@ -528,7 +575,7 @@ CLASS lcl_data_extractor IMPLEMENTATION.
     LOOP AT lt_orders INTO DATA(ls_order)
       GROUP BY ( lgnum = ls_order-lgnum
                  date  = ls_order-bdatu
-                 hour  = CONV i( ls_order-bupts+0(2) ) )
+                 hour  = CONV i( ls_order-bzeit+0(2) ) )
       INTO DATA(lo_group).
 
       CLEAR ls_wl.
@@ -573,17 +620,17 @@ CLASS lcl_data_extractor IMPLEMENTATION.
 
     " Filter only confirmed orders with user
     DELETE lt_orders WHERE confirmed <> abap_true.
-    DELETE lt_orders WHERE pession IS INITIAL.
+    DELETE lt_orders WHERE qname IS INITIAL.
 
     " Group by warehouse and user
     LOOP AT lt_orders INTO DATA(ls_order)
-      GROUP BY ( lgnum   = ls_order-lgnum
-                 pession = ls_order-pession )
+      GROUP BY ( lgnum = ls_order-lgnum
+                 qname = ls_order-qname )
       INTO DATA(lo_group).
 
       CLEAR ls_user.
       ls_user-lgnum = lo_group-lgnum.
-      ls_user-pession = lo_group-pession.
+      ls_user-qname = lo_group-qname.
 
       DATA: lv_total_hours TYPE p LENGTH 15 DECIMALS 2.
 
@@ -650,7 +697,7 @@ CLASS lcl_data_extractor IMPLEMENTATION.
         ENDIF.
 
         " Track hours for peak calculation
-        APPEND CONV i( ls_member-bupts+0(2) ) TO lt_hours.
+        APPEND CONV i( ls_member-bzeit+0(2) ) TO lt_hours.
       ENDLOOP.
 
       IF lv_confirmed > 0.
@@ -848,10 +895,10 @@ CLASS lcl_data_extractor IMPLEMENTATION.
       ls_sim-nltyp = ls_order-nltyp.
       ls_sim-nlpla = ls_order-nlpla.
       ls_sim-bdatu = ls_order-bdatu.
-      ls_sim-bupts = ls_order-bupts.
+      ls_sim-bzeit = ls_order-bzeit.
 
       " Create timestamp for sorting
-      CONVERT DATE ls_order-bdatu TIME ls_order-bupts
+      CONVERT DATE ls_order-bdatu TIME ls_order-bzeit
         INTO TIME STAMP ls_sim-timestamp TIME ZONE sy-zonlo.
 
       " Create direction indicator
@@ -1687,11 +1734,11 @@ CLASS lcl_controller DEFINITION FINAL.
     METHODS:
       initialize
         IMPORTING
-          it_lgnum     TYPE RANGE OF lgnum
-          it_lgtyp     TYPE RANGE OF lgtyp
-          it_lgpla     TYPE RANGE OF lgpla
-          it_matnr     TYPE RANGE OF matnr
-          it_bwlvs     TYPE RANGE OF bwlvs
+          it_lgnum     TYPE lcl_data_extractor=>gty_r_lgnum
+          it_lgtyp     TYPE lcl_data_extractor=>gty_r_lgtyp
+          it_lgpla     TYPE lcl_data_extractor=>gty_r_lgpla
+          it_matnr     TYPE lcl_data_extractor=>gty_r_matnr
+          it_bwlvs     TYPE lcl_data_extractor=>gty_r_bwlvs
           iv_date_from TYPE sydatum
           iv_date_to   TYPE sydatum,
 
