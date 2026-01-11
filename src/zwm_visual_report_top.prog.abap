@@ -41,8 +41,8 @@ CONSTANTS:
   gc_tab_workload   TYPE i VALUE 6,
 
   " Traffic light thresholds
-  gc_occupancy_high TYPE p DECIMALS 2 VALUE '85.00',
-  gc_occupancy_med  TYPE p DECIMALS 2 VALUE '60.00',
+  gc_occupancy_high TYPE p LENGTH 5 DECIMALS 2 VALUE '85.00',
+  gc_occupancy_med  TYPE p LENGTH 5 DECIMALS 2 VALUE '60.00',
 
   " Time thresholds for TO confirmation (in hours)
   gc_to_time_good   TYPE i VALUE 4,
