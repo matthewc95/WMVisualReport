@@ -349,8 +349,8 @@ FORM display_visual_timeline.
     ENDIF.
 
     " Movement line with visual indicator
-    WRITE: / ls_sim-bupts+0(5),          " Time (HH:MM)
-             icon_transport AS ICON,      " Movement icon
+    WRITE: / ls_sim-bzeit+0(5),          " Time (HH:MM)
+             icon_led_green AS ICON,      " Movement icon
              ls_sim-matnr,                " Material
              ls_sim-direction,            " From -> To
              ls_sim-vsolm DECIMALS 2,     " Quantity

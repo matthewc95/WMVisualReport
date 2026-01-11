@@ -66,9 +66,9 @@ CLASS lcl_utilities IMPLEMENTATION.
 
   METHOD get_trend_icon.
     rv_icon = SWITCH #( iv_trend
-      WHEN 'U' THEN icon_trend_up
-      WHEN 'D' THEN icon_trend_down
-      WHEN 'S' THEN icon_trend_stable
+      WHEN 'U' THEN icon_led_green
+      WHEN 'D' THEN icon_led_red
+      WHEN 'S' THEN icon_led_yellow
       ELSE icon_space ).
   ENDMETHOD.
 
@@ -1877,11 +1877,11 @@ CLASS lcl_controller IMPLEMENTATION.
     WRITE: / '└─────────────────────────────────────────────────────────────────────────────┘'.
     FORMAT COLOR OFF.
 
-    WRITE: / icon_wf_workitem AS ICON, 'Total Bins:'.
+    WRITE: / icon_led_inactive AS ICON, 'Total Bins:'.
     WRITE: AT 30 gv_total_bins.
 
     FORMAT COLOR COL_POSITIVE.
-    WRITE: / icon_okay AS ICON, 'Occupied Bins:'.
+    WRITE: / icon_led_green AS ICON, 'Occupied Bins:'.
     WRITE: AT 30 gv_occupied_bins.
     FORMAT COLOR OFF.
 
@@ -1889,11 +1889,11 @@ CLASS lcl_controller IMPLEMENTATION.
     WRITE: AT 30 gv_empty_bins.
 
     FORMAT COLOR COL_NEGATIVE.
-    WRITE: / icon_locked AS ICON, 'Blocked Bins:'.
+    WRITE: / icon_led_red AS ICON, 'Blocked Bins:'.
     WRITE: AT 30 gv_blocked_bins.
     FORMAT COLOR OFF.
 
-    WRITE: / icon_trend_up AS ICON, 'Occupancy Rate:'.
+    WRITE: / icon_led_green AS ICON, 'Occupancy Rate:'.
     WRITE: AT 30 gv_overall_occupancy, '%'.
 
     SKIP.
@@ -1905,20 +1905,20 @@ CLASS lcl_controller IMPLEMENTATION.
     WRITE: / '└─────────────────────────────────────────────────────────────────────────────┘'.
     FORMAT COLOR OFF.
 
-    WRITE: / icon_list AS ICON, 'Total Transfer Orders:'.
+    WRITE: / icon_led_inactive AS ICON, 'Total Transfer Orders:'.
     WRITE: AT 35 gv_total_to.
 
     FORMAT COLOR COL_TOTAL.
-    WRITE: / icon_time AS ICON, 'Open TOs (pending):'.
+    WRITE: / icon_led_yellow AS ICON, 'Open TOs (pending):'.
     WRITE: AT 35 gv_open_to.
     FORMAT COLOR OFF.
 
     FORMAT COLOR COL_POSITIVE.
-    WRITE: / icon_okay AS ICON, 'Confirmed TOs:'.
+    WRITE: / icon_led_green AS ICON, 'Confirmed TOs:'.
     WRITE: AT 35 gv_confirmed_to.
     FORMAT COLOR OFF.
 
-    WRITE: / icon_date AS ICON, 'Avg Confirmation Time:'.
+    WRITE: / icon_led_inactive AS ICON, 'Avg Confirmation Time:'.
     WRITE: AT 35 gv_avg_confirm_time DECIMALS 2, 'hours'.
 
     SKIP.
