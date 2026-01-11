@@ -649,11 +649,13 @@ CLASS lcl_data_extractor IMPLEMENTATION.
 
     " Calculate efficiency (relative to best performer)
     IF rt_users IS NOT INITIAL.
-      DATA(lv_min_avg) = REDUCE p(
-        INIT min TYPE p LENGTH 7 DECIMALS 2 VALUE 99999
-        FOR wa IN rt_users
-        NEXT min = COND #( WHEN wa-avg_time_hours < min AND wa-avg_time_hours > 0
-                           THEN wa-avg_time_hours ELSE min ) ).
+      DATA: lv_min_avg TYPE gty_hours VALUE 99999.
+
+      LOOP AT rt_users INTO DATA(ls_user_check).
+        IF ls_user_check-avg_time_hours < lv_min_avg AND ls_user_check-avg_time_hours > 0.
+          lv_min_avg = ls_user_check-avg_time_hours.
+        ENDIF.
+      ENDLOOP.
 
       LOOP AT rt_users ASSIGNING FIELD-SYMBOL(<fs_user>).
         IF <fs_user>-avg_time_hours > 0 AND lv_min_avg > 0.
