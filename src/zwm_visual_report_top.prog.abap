@@ -52,6 +52,13 @@ CONSTANTS:
   gc_max_records    TYPE i VALUE 100000.
 
 *----------------------------------------------------------------------*
+* Simple Types for Method Parameters
+*----------------------------------------------------------------------*
+TYPES:
+  gty_hours   TYPE p LENGTH 7 DECIMALS 2,
+  gty_percent TYPE p LENGTH 5 DECIMALS 2.
+
+*----------------------------------------------------------------------*
 * Types - Storage Bin Monitoring
 *----------------------------------------------------------------------*
 TYPES:
