@@ -29,7 +29,7 @@ CLASS lcl_utilities DEFINITION FINAL.
                   iv_time1        TYPE syuzeit
                   iv_date2        TYPE sydatum
                   iv_time2        TYPE syuzeit
-        RETURNING VALUE(rv_hours) TYPE p LENGTH 7 DECIMALS 2,
+        RETURNING VALUE(rv_hours) TYPE gty_hours,
 
       " Progress bar generation
       generate_bar_graph
@@ -42,7 +42,7 @@ CLASS lcl_utilities DEFINITION FINAL.
       calc_percentage
         IMPORTING iv_part         TYPE numeric
                   iv_total        TYPE numeric
-        RETURNING VALUE(rv_pct)   TYPE p LENGTH 5 DECIMALS 2,
+        RETURNING VALUE(rv_pct)   TYPE gty_percent,
 
       " Day name
       get_day_name
