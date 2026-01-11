@@ -19,8 +19,8 @@ SELECTION-SCREEN END OF BLOCK b1.
 *----------------------------------------------------------------------*
 SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE TEXT-b02.
   PARAMETERS:
-    p_datfr TYPE sydatum DEFAULT sy-datum - 30, " Date From
-    p_datto TYPE sydatum DEFAULT sy-datum.      " Date To
+    p_datfr TYPE sydatum,                        " Date From
+    p_datto TYPE sydatum.                        " Date To
 SELECTION-SCREEN END OF BLOCK b2.
 
 *----------------------------------------------------------------------*
@@ -81,3 +81,10 @@ SELECTION-SCREEN END OF BLOCK b5.
 * P_MAX: Max Records
 * P_HTML: HTML Dashboard Mode
 * P_TEST: Generate Test Data
+
+*----------------------------------------------------------------------*
+* Initialization - Set default date values
+*----------------------------------------------------------------------*
+INITIALIZATION.
+  p_datto = sy-datum.
+  p_datfr = sy-datum - 30.
