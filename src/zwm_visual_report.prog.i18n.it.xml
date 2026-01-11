@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+ <asx:values>
+  <TPOOL>
+   <item>
+    <ID>R</ID>
+    <ENTRY>Dashboard Visivo SAP WM</ENTRY>
+    <LENGTH>25</LENGTH>
+   </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B01</KEY>
+    <ENTRY>Selezione Magazzino</ENTRY>
+    <LENGTH>19</LENGTH>
+   </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B02</KEY>
+    <ENTRY>Intervallo Date per Ordini Trasferimento</ENTRY>
+    <LENGTH>41</LENGTH>
+   </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B03</KEY>
+    <ENTRY>Filtro Materiale e Movimento</ENTRY>
+    <LENGTH>29</LENGTH>
+   </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B04</KEY>
+    <ENTRY>Modalita Visualizzazione</ENTRY>
+    <LENGTH>24</LENGTH>
+   </item>
+   <item>
+    <ID>I</ID>
+    <KEY>B05</KEY>
+    <ENTRY>Opzioni Aggiuntive</ENTRY>
+    <LENGTH>19</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_DATFR</KEY>
+    <ENTRY>        Data Da</ENTRY>
+    <LENGTH>15</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_DATTO</KEY>
+    <ENTRY>        Data A</ENTRY>
+    <LENGTH>14</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_HTML</KEY>
+    <ENTRY>        Modalita Dashboard HTML</ENTRY>
+    <LENGTH>29</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_MAX</KEY>
+    <ENTRY>        Num. Max Record</ENTRY>
+    <LENGTH>23</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>P_TEST</KEY>
+    <ENTRY>        Genera Dati di Test</ENTRY>
+    <LENGTH>27</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_BINS</KEY>
+    <ENTRY>        Ubicazioni</ENTRY>
+    <LENGTH>18</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_KPI</KEY>
+    <ENTRY>        Statistiche KPI</ENTRY>
+    <LENGTH>24</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_OVER</KEY>
+    <ENTRY>        Dashboard Riepilogo</ENTRY>
+    <LENGTH>28</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_SIM</KEY>
+    <ENTRY>        Simulazione Movimenti</ENTRY>
+    <LENGTH>29</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_TO</KEY>
+    <ENTRY>        Ordini di Trasferimento</ENTRY>
+    <LENGTH>32</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>RB_WORK</KEY>
+    <ENTRY>        Analisi Carico Lavoro</ENTRY>
+    <LENGTH>29</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_BWLVS</KEY>
+    <ENTRY>D       Tipo Movimento</ENTRY>
+    <LENGTH>22</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_LGNUM</KEY>
+    <ENTRY>D       Numero Magazzino</ENTRY>
+    <LENGTH>24</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_LGPLA</KEY>
+    <ENTRY>D       Ubicazione</ENTRY>
+    <LENGTH>18</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_LGTYP</KEY>
+    <ENTRY>D       Tipo Ubicazione</ENTRY>
+    <LENGTH>23</LENGTH>
+   </item>
+   <item>
+    <ID>S</ID>
+    <KEY>S_MATNR</KEY>
+    <ENTRY>D       Materiale</ENTRY>
+    <LENGTH>17</LENGTH>
+   </item>
+  </TPOOL>
+ </asx:values>
+</asx:abap>
+</abapGit>
