@@ -1804,37 +1804,43 @@ CLASS lcl_controller IMPLEMENTATION.
   METHOD calculate_global_kpis.
     " Calculate bin metrics
     gv_total_bins = lines( gt_storage_bins ).
-    gv_occupied_bins = REDUCE #(
-      INIT count = 0
-      FOR wa IN gt_storage_bins
-      WHERE ( quant_count > 0 )
-      NEXT count = count + 1 ).
-    gv_empty_bins = REDUCE #(
-      INIT count = 0
-      FOR wa IN gt_storage_bins
-      WHERE ( quant_count = 0 AND blocked <> abap_true )
-      NEXT count = count + 1 ).
-    gv_blocked_bins = REDUCE #(
-      INIT count = 0
-      FOR wa IN gt_storage_bins
-      WHERE ( blocked = abap_true )
-      NEXT count = count + 1 ).
+
+    " Count occupied bins
+    gv_occupied_bins = 0.
+    LOOP AT gt_storage_bins INTO DATA(ls_bin1) WHERE quant_count > 0.
+      gv_occupied_bins = gv_occupied_bins + 1.
+    ENDLOOP.
+
+    " Count empty bins (not blocked and no quants)
+    gv_empty_bins = 0.
+    LOOP AT gt_storage_bins INTO DATA(ls_bin2) WHERE quant_count = 0.
+      IF ls_bin2-blocked <> abap_true.
+        gv_empty_bins = gv_empty_bins + 1.
+      ENDIF.
+    ENDLOOP.
+
+    " Count blocked bins
+    gv_blocked_bins = 0.
+    LOOP AT gt_storage_bins INTO DATA(ls_bin3) WHERE blocked = abap_true.
+      gv_blocked_bins = gv_blocked_bins + 1.
+    ENDLOOP.
 
     " Calculate TO metrics
     gv_total_to = lines( gt_transfer_orders ).
-    gv_open_to = REDUCE #(
-      INIT count = 0
-      FOR wa IN gt_transfer_orders
-      WHERE ( confirmed <> abap_true )
-      NEXT count = count + 1 ).
+
+    " Count open TOs
+    gv_open_to = 0.
+    LOOP AT gt_transfer_orders INTO DATA(ls_to1) WHERE confirmed <> abap_true.
+      gv_open_to = gv_open_to + 1.
+    ENDLOOP.
     gv_confirmed_to = gv_total_to - gv_open_to.
 
     " Calculate average confirmation time (only for confirmed)
     DATA: lv_total_hours TYPE p LENGTH 15 DECIMALS 2,
           lv_count       TYPE i.
 
-    LOOP AT gt_transfer_orders INTO DATA(ls_to) WHERE confirmed = abap_true.
-      lv_total_hours = lv_total_hours + ls_to-wait_hours.
+    LOOP AT gt_transfer_orders INTO DATA(ls_to2) WHERE confirmed = abap_true.
+      lv_total_hours = lv_total_hours + ls_to2-wait_hours.
       lv_count = lv_count + 1.
     ENDLOOP.
 
@@ -1848,10 +1854,10 @@ CLASS lcl_controller IMPLEMENTATION.
     ENDIF.
 
     " Calculate total quants
-    gv_total_quants = REDUCE #(
-      INIT total = 0
-      FOR wa IN gt_storage_bins
-      NEXT total = total + wa-quant_count ).
+    gv_total_quants = 0.
+    LOOP AT gt_storage_bins INTO DATA(ls_bin4).
+      gv_total_quants = gv_total_quants + ls_bin4-quant_count.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD display_overview.
