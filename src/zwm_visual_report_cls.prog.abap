@@ -914,44 +914,26 @@ CLASS lcl_data_extractor IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_movement_type_text.
-    DATA: ls_t333t TYPE t333t.
-
-    SELECT SINGLE * FROM t333t
-      INTO ls_t333t
-      WHERE spras = sy-langu
-        AND bwlvs = iv_bwlvs.
-    IF sy-subrc = 0.
-      rv_text = ls_t333t-btext.
-    ELSE.
-      rv_text = iv_bwlvs.
-    ENDIF.
+    " Return movement type code as text - customize if text table available
+    rv_text = iv_bwlvs.
   ENDMETHOD.
 
   METHOD get_material_description.
-    DATA: ls_makt TYPE makt.
+    " Return material description from MAKT
+    DATA: lv_maktx TYPE makt-maktx.
 
-    SELECT SINGLE * FROM makt
-      INTO ls_makt
+    SELECT SINGLE maktx FROM makt
+      INTO lv_maktx
       WHERE matnr = iv_matnr
         AND spras = sy-langu.
     IF sy-subrc = 0.
-      rv_text = ls_makt-maktx.
+      rv_text = lv_maktx.
     ENDIF.
   ENDMETHOD.
 
   METHOD get_storage_type_text.
-    DATA: ls_t301t TYPE t301t.
-
-    SELECT SINGLE * FROM t301t
-      INTO ls_t301t
-      WHERE lgnum = iv_lgnum
-        AND lgtyp = iv_lgtyp
-        AND spras = sy-langu.
-    IF sy-subrc = 0.
-      rv_text = ls_t301t-ltypt.
-    ELSE.
-      rv_text = iv_lgtyp.
-    ENDIF.
+    " Return storage type code as text - customize if text table available
+    rv_text = iv_lgtyp.
   ENDMETHOD.
 
 ENDCLASS.
