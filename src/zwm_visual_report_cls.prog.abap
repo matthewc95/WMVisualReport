@@ -127,7 +127,7 @@ CLASS lcl_utilities IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_day_name.
-    DATA: lv_day_num TYPE i.
+    DATA: lv_day_num TYPE dtresr-weekday.
 
     CALL FUNCTION 'DATE_COMPUTE_DAY'
       EXPORTING
@@ -136,13 +136,14 @@ CLASS lcl_utilities IMPLEMENTATION.
         day  = lv_day_num.
 
     rv_day = SWITCH #( lv_day_num
-      WHEN 1 THEN 'Monday'
-      WHEN 2 THEN 'Tuesday'
-      WHEN 3 THEN 'Wednesday'
-      WHEN 4 THEN 'Thursday'
-      WHEN 5 THEN 'Friday'
-      WHEN 6 THEN 'Saturday'
-      WHEN 7 THEN 'Sunday' ).
+      WHEN '1' THEN 'Monday'
+      WHEN '2' THEN 'Tuesday'
+      WHEN '3' THEN 'Wednesday'
+      WHEN '4' THEN 'Thursday'
+      WHEN '5' THEN 'Friday'
+      WHEN '6' THEN 'Saturday'
+      WHEN '7' THEN 'Sunday'
+      ELSE 'Unknown' ).
   ENDMETHOD.
 
 ENDCLASS.
