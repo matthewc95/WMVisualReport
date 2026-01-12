@@ -627,8 +627,15 @@ CLASS lcl_alv_handler_graph DEFINITION FINAL.
       go_instance TYPE REF TO lcl_alv_handler_graph.
 
     DATA:
-      mo_salv     TYPE REF TO cl_salv_table,
-      mo_container TYPE REF TO cl_gui_container.
+      mo_salv      TYPE REF TO cl_salv_table,
+      mo_container TYPE REF TO cl_gui_container,
+      " Instance data tables - must persist for ALV scrolling
+      mt_bins      TYPE gty_storage_bins_graph,
+      mt_orders    TYPE gty_transfer_orders_graph,
+      mt_kpis      TYPE gty_movement_kpis_graph,
+      mt_stsum     TYPE gty_storage_type_sums_graph,
+      mt_daily     TYPE gty_daily_stats_graph,
+      mt_users     TYPE gty_user_workloads_graph.
 
     CLASS-METHODS:
       get_instance
@@ -700,8 +707,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_bins_graph.
-    DATA: lt_display TYPE gty_storage_bins_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_bins = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -711,13 +718,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_bins ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_bins ).
         ENDIF.
 
         setup_alv_common(
@@ -763,8 +770,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_orders_graph.
-    DATA: lt_display TYPE gty_transfer_orders_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_orders = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -774,13 +781,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_orders ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_orders ).
         ENDIF.
 
         setup_alv_common(
@@ -838,8 +845,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_kpis_graph.
-    DATA: lt_display TYPE gty_movement_kpis_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_kpis = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -849,13 +856,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_kpis ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_kpis ).
         ENDIF.
 
         setup_alv_common(
@@ -879,8 +886,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_stsum_graph.
-    DATA: lt_display TYPE gty_storage_type_sums_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_stsum = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -890,13 +897,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_stsum ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_stsum ).
         ENDIF.
 
         setup_alv_common(
@@ -920,8 +927,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_daily_graph.
-    DATA: lt_display TYPE gty_daily_stats_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_daily = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -931,13 +938,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_daily ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_daily ).
         ENDIF.
 
         setup_alv_common(
@@ -960,8 +967,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_users_graph.
-    DATA: lt_display TYPE gty_user_workloads_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_users = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -971,13 +978,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_users ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_users ).
         ENDIF.
 
         setup_alv_common(
