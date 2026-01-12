@@ -741,24 +741,56 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
-        " Column headings
+        " Column headings - Storage Bins
         TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_medium_text( 'Warehouse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_long_text( 'Warehouse Number' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_short_text( 'Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_medium_text( 'Stor.Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_long_text( 'Storage Type' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) )->set_short_text( 'Bin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) )->set_medium_text( 'Stor.Bin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) )->set_long_text( 'Storage Bin' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'LGBER' ) )->set_short_text( 'Area' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGBER' ) )->set_medium_text( 'Stor.Area' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGBER' ) )->set_long_text( 'Storage Section' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'LPTYP' ) )->set_short_text( 'BinTy' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LPTYP' ) )->set_medium_text( 'Bin Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LPTYP' ) )->set_long_text( 'Storage Bin Type' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'MAXLE' ) )->set_short_text( 'MaxSU' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAXLE' ) )->set_medium_text( 'Max SU' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAXLE' ) )->set_long_text( 'Max Storage Units' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'ANZLE' ) )->set_short_text( 'CurSU' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'ANZLE' ) )->set_medium_text( 'Curr SU' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'ANZLE' ) )->set_long_text( 'Current Storage Units' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'VERME' ) )->set_short_text( 'AvlQty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VERME' ) )->set_medium_text( 'Avail Qty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VERME' ) )->set_long_text( 'Available Quantity' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'GESME' ) )->set_short_text( 'TotQty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'GESME' ) )->set_medium_text( 'Total Qty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'GESME' ) )->set_long_text( 'Total Quantity' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_short_text( 'UoM' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_medium_text( 'Unit' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_long_text( 'Unit of Measure' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) )->set_short_text( 'Occ%' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'St' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) )->set_medium_text( 'Occupancy%' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) )->set_long_text( 'Occupancy Percentage' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'Stat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_medium_text( 'Status' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_long_text( 'Bin Status' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_short_text( 'Matnr' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_medium_text( 'Material' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_long_text( 'Material Number' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) )->set_short_text( '#Mat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) )->set_medium_text( 'Mat Count' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) )->set_long_text( 'Number of Materials' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) )->set_short_text( '#Qnt' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) )->set_medium_text( 'Quant Cnt' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) )->set_long_text( 'Number of Quants' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED' ) )->set_short_text( 'Blk' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED' ) )->set_medium_text( 'Blocked' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED' ) )->set_long_text( 'Bin Blocked' ).
           CATCH cx_salv_not_found.
         ENDTRY.
 
@@ -813,31 +845,74 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
-        " Column headings
+        " Column headings - Transfer Orders
         TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_medium_text( 'Warehouse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_long_text( 'Warehouse Number' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'TANUM' ) )->set_short_text( 'TO#' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TANUM' ) )->set_medium_text( 'TO Number' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TANUM' ) )->set_long_text( 'Transfer Order Number' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'TAPOS' ) )->set_short_text( 'Item' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TAPOS' ) )->set_medium_text( 'TO Item' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TAPOS' ) )->set_long_text( 'Transfer Order Item' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_short_text( 'MvT' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_medium_text( 'Mov.Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_long_text( 'Movement Type' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'REFNR' ) )->set_short_text( 'RefNo' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'REFNR' ) )->set_medium_text( 'Reference' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'REFNR' ) )->set_long_text( 'Reference Number' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'NLTYP' ) )->set_short_text( 'DestTy' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'NLTYP' ) )->set_medium_text( 'Dest Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'NLTYP' ) )->set_long_text( 'Destination Storage Type' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'NLPLA' ) )->set_short_text( 'DestBin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'NLPLA' ) )->set_medium_text( 'Dest Bin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'NLPLA' ) )->set_long_text( 'Destination Storage Bin' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'VLTYP' ) )->set_short_text( 'SrcTy' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VLTYP' ) )->set_medium_text( 'Src Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VLTYP' ) )->set_long_text( 'Source Storage Type' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'VLPLA' ) )->set_short_text( 'SrcBin' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_short_text( 'Material' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'WERKS' ) )->set_short_text( 'Plant' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VLPLA' ) )->set_medium_text( 'Src Bin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VLPLA' ) )->set_long_text( 'Source Storage Bin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_short_text( 'Matnr' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_medium_text( 'Material' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_long_text( 'Material Number' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'WERKS' ) )->set_short_text( 'Plnt' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'WERKS' ) )->set_medium_text( 'Plant' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'WERKS' ) )->set_long_text( 'Plant' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'MAKTX' ) )->set_short_text( 'Descr' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAKTX' ) )->set_medium_text( 'Description' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAKTX' ) )->set_medium_text( 'Mat.Descr' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAKTX' ) )->set_long_text( 'Material Description' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'VSOLM' ) )->set_short_text( 'Qty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VSOLM' ) )->set_medium_text( 'Quantity' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VSOLM' ) )->set_long_text( 'Target Quantity' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_short_text( 'UoM' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_medium_text( 'Unit' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_long_text( 'Unit of Measure' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BDATU' ) )->set_short_text( 'CrDate' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BZEIT' ) )->set_short_text( 'CrTime' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BDATU' ) )->set_medium_text( 'Created' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BDATU' ) )->set_long_text( 'Creation Date' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BZEIT' ) )->set_short_text( 'CrTim' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BZEIT' ) )->set_medium_text( 'Cr.Time' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BZEIT' ) )->set_long_text( 'Creation Time' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'QDATU' ) )->set_short_text( 'CnfDat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QDATU' ) )->set_medium_text( 'Conf.Date' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QDATU' ) )->set_long_text( 'Confirmation Date' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'QZEIT' ) )->set_short_text( 'CnfTim' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QZEIT' ) )->set_medium_text( 'Conf.Time' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QZEIT' ) )->set_long_text( 'Confirmation Time' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) )->set_short_text( 'User' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'WAIT_HOURS' ) )->set_short_text( 'WaitHr' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS' ) )->set_short_text( 'Status' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'St' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) )->set_medium_text( 'Conf.User' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) )->set_long_text( 'Confirmed By User' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'WAIT_HOURS' ) )->set_short_text( 'WaitH' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'WAIT_HOURS' ) )->set_medium_text( 'Wait Hours' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'WAIT_HOURS' ) )->set_long_text( 'Waiting Time (Hours)' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS' ) )->set_short_text( 'Stat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS' ) )->set_medium_text( 'Status' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS' ) )->set_long_text( 'TO Status' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'Stat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_medium_text( 'Status' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_long_text( 'Status Icon' ).
           CATCH cx_salv_not_found.
         ENDTRY.
 
@@ -902,20 +977,41 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
-        " Column headings
+        " Column headings - Movement KPIs
         TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_medium_text( 'Warehouse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_long_text( 'Warehouse Number' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_short_text( 'MvT' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_medium_text( 'Mov.Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_long_text( 'Movement Type' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS_TXT' ) )->set_short_text( 'Descr' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS_TXT' ) )->set_medium_text( 'Description' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS_TXT' ) )->set_long_text( 'Movement Type Description' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'TO_COUNT' ) )->set_short_text( 'Total' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_COUNT' ) )->set_medium_text( 'Total TOs' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_COUNT' ) )->set_long_text( 'Total Transfer Orders' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_short_text( 'Conf' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_medium_text( 'Confirmed' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_long_text( 'Confirmed TOs' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'TO_OPEN' ) )->set_short_text( 'Open' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_short_text( 'AvgHrs' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MIN_TIME_HOURS' ) )->set_short_text( 'MinHrs' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAX_TIME_HOURS' ) )->set_short_text( 'MaxHrs' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_short_text( 'TotQty' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'St' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_OPEN' ) )->set_medium_text( 'Open TOs' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_OPEN' ) )->set_long_text( 'Open Transfer Orders' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_short_text( 'AvgH' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_medium_text( 'Avg Hours' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_long_text( 'Avg Confirmation Time (h)' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MIN_TIME_HOURS' ) )->set_short_text( 'MinH' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MIN_TIME_HOURS' ) )->set_medium_text( 'Min Hours' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MIN_TIME_HOURS' ) )->set_long_text( 'Min Confirmation Time (h)' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAX_TIME_HOURS' ) )->set_short_text( 'MaxH' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAX_TIME_HOURS' ) )->set_medium_text( 'Max Hours' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAX_TIME_HOURS' ) )->set_long_text( 'Max Confirmation Time (h)' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_short_text( 'TotQy' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_medium_text( 'Total Qty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_long_text( 'Total Quantity Moved' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'Stat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_medium_text( 'Status' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_long_text( 'Performance Status' ).
           CATCH cx_salv_not_found.
         ENDTRY.
 
@@ -960,21 +1056,41 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
-        " Column headings
+        " Column headings - Storage Type Summary
         TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_medium_text( 'Warehouse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_long_text( 'Warehouse Number' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_short_text( 'Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_medium_text( 'Stor.Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_long_text( 'Storage Type' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP_TXT' ) )->set_short_text( 'Descr' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP_TXT' ) )->set_medium_text( 'Description' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_BINS' ) )->set_short_text( 'TotBin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP_TXT' ) )->set_long_text( 'Storage Type Description' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_BINS' ) )->set_short_text( 'Total' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_BINS' ) )->set_medium_text( 'Total Bins' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_BINS' ) )->set_long_text( 'Total Storage Bins' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPIED_BINS' ) )->set_short_text( 'Occup' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPIED_BINS' ) )->set_medium_text( 'Occupied' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPIED_BINS' ) )->set_long_text( 'Occupied Bins' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'EMPTY_BINS' ) )->set_short_text( 'Empty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'EMPTY_BINS' ) )->set_medium_text( 'Empty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'EMPTY_BINS' ) )->set_long_text( 'Empty Bins' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED_BINS' ) )->set_short_text( 'Block' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QUANTS' ) )->set_short_text( 'Quants' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED_BINS' ) )->set_medium_text( 'Blocked' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED_BINS' ) )->set_long_text( 'Blocked Bins' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QUANTS' ) )->set_short_text( 'Qnts' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QUANTS' ) )->set_medium_text( 'Quants' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QUANTS' ) )->set_long_text( 'Total Quants' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY_PCT' ) )->set_short_text( 'Occ%' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'St' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY_PCT' ) )->set_medium_text( 'Occupancy%' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY_PCT' ) )->set_long_text( 'Occupancy Percentage' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'Stat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_medium_text( 'Status' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_long_text( 'Occupancy Status' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BAR_GRAPH' ) )->set_short_text( 'Graph' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_GRAPH' ) )->set_medium_text( 'Occupancy Graph' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_GRAPH' ) )->set_medium_text( 'Occ.Graph' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_GRAPH' ) )->set_long_text( 'Occupancy Bar Graph' ).
           CATCH cx_salv_not_found.
         ENDTRY.
 
@@ -1018,18 +1134,38 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
-        " Column headings
+        " Column headings - Daily Statistics
         TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_medium_text( 'Warehouse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_long_text( 'Warehouse Number' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'DATE' ) )->set_short_text( 'Date' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'DATE' ) )->set_medium_text( 'Date' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'DATE' ) )->set_long_text( 'Activity Date' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'DAY_NAME' ) )->set_short_text( 'Day' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CREATED' ) )->set_short_text( 'Create' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'DAY_NAME' ) )->set_medium_text( 'Weekday' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'DAY_NAME' ) )->set_long_text( 'Day of Week' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CREATED' ) )->set_short_text( 'Creat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CREATED' ) )->set_medium_text( 'TOs Creat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CREATED' ) )->set_long_text( 'TOs Created' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_short_text( 'Conf' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_CONFIRM_HRS' ) )->set_short_text( 'AvgHrs' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_short_text( 'TotQty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_medium_text( 'TOs Conf' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_long_text( 'TOs Confirmed' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_CONFIRM_HRS' ) )->set_short_text( 'AvgH' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_CONFIRM_HRS' ) )->set_medium_text( 'Avg Hours' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_CONFIRM_HRS' ) )->set_long_text( 'Avg Confirm Time (hrs)' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_short_text( 'TotQy' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_medium_text( 'Total Qty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_long_text( 'Total Quantity Moved' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'PEAK_HOUR' ) )->set_short_text( 'Peak' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CREATED' ) )->set_short_text( 'Created' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CONFIRMED' ) )->set_short_text( 'Confirmed' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'PEAK_HOUR' ) )->set_medium_text( 'Peak Hour' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'PEAK_HOUR' ) )->set_long_text( 'Peak Activity Hour' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CREATED' ) )->set_short_text( 'CrBar' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CREATED' ) )->set_medium_text( 'Created' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CREATED' ) )->set_long_text( 'Created TOs Graph' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CONFIRMED' ) )->set_short_text( 'CfBar' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CONFIRMED' ) )->set_medium_text( 'Confirmed' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CONFIRMED' ) )->set_long_text( 'Confirmed TOs Graph' ).
           CATCH cx_salv_not_found.
         ENDTRY.
 
@@ -1073,18 +1209,29 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
-        " Column headings
+        " Column headings - User Workload
         TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_medium_text( 'Warehouse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_long_text( 'Warehouse Number' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) )->set_short_text( 'User' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) )->set_medium_text( 'User ID' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) )->set_long_text( 'User ID' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'USER_NAME' ) )->set_short_text( 'Name' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'USER_NAME' ) )->set_medium_text( 'User Name' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'USER_NAME' ) )->set_long_text( 'User Full Name' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_short_text( 'Conf' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_medium_text( 'TOs Confirmed' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_medium_text( 'TOs Conf' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_long_text( 'TOs Confirmed' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'ITEMS_PROCESSED' ) )->set_short_text( 'Items' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_short_text( 'AvgHrs' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'ITEMS_PROCESSED' ) )->set_medium_text( 'Items Proc' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'ITEMS_PROCESSED' ) )->set_long_text( 'Items Processed' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_short_text( 'AvgH' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_medium_text( 'Avg Hours' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_long_text( 'Avg Time per TO (hrs)' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'EFFICIENCY' ) )->set_short_text( 'Eff%' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'EFFICIENCY' ) )->set_medium_text( 'Efficiency %' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'EFFICIENCY' ) )->set_medium_text( 'Efficiency' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'EFFICIENCY' ) )->set_long_text( 'User Efficiency %' ).
           CATCH cx_salv_not_found.
         ENDTRY.
 

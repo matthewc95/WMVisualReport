@@ -118,6 +118,14 @@ ENDMODULE.
 *&---------------------------------------------------------------------*
 MODULE display_alv OUTPUT.
   DATA: lo_ctrl TYPE REF TO lcl_controller_graph.
+
   lo_ctrl = lcl_controller_graph=>get_instance( ).
+
+  " Free previous SALV instance before creating new one
+  IF lo_ctrl->mo_alv_handler->mo_salv IS BOUND.
+    lo_ctrl->mo_alv_handler->mo_salv->close_screen( ).
+    FREE lo_ctrl->mo_alv_handler->mo_salv.
+  ENDIF.
+
   lo_ctrl->display_current_view( ).
 ENDMODULE.
