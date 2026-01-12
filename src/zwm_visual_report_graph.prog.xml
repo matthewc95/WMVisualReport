@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_PROG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>ZWM_VISUAL_REPORT_GRAPH</NAME>
+    <DTEFX>00000000</DTEFX>
+    <STATE>A</STATE>
+    <SUBC>1</SUBC>
+    <RSTAT>K</RSTAT>
+    <FIXPT>X</FIXPT>
+    <LDBNAME/>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+   <TPOOL>
+    <item>
+     <ID>R</ID>
+     <ENTRY>SAP WM Visual Dashboard - Graphical Version</ENTRY>
+     <LENGTH>48</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_DATFR</KEY>
+     <ENTRY>        Date From</ENTRY>
+     <LENGTH>20</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_DATTO</KEY>
+     <ENTRY>        Date To</ENTRY>
+     <LENGTH>20</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>RB_BINS</KEY>
+     <ENTRY>        Storage Bins</ENTRY>
+     <LENGTH>20</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>RB_DAILY</KEY>
+     <ENTRY>        Daily Statistics</ENTRY>
+     <LENGTH>24</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>RB_KPI</KEY>
+     <ENTRY>        Movement KPIs</ENTRY>
+     <LENGTH>22</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>RB_STSUM</KEY>
+     <ENTRY>        Storage Type Summary</ENTRY>
+     <LENGTH>28</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>RB_TO</KEY>
+     <ENTRY>        Transfer Orders</ENTRY>
+     <LENGTH>24</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>RB_USERS</KEY>
+     <ENTRY>        User Workload</ENTRY>
+     <LENGTH>22</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>S_BWLVS</KEY>
+     <ENTRY>        Movement Type</ENTRY>
+     <LENGTH>22</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>S_LGNUM</KEY>
+     <ENTRY>        Warehouse Number</ENTRY>
+     <LENGTH>24</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>S_LGPLA</KEY>
+     <ENTRY>        Storage Bin</ENTRY>
+     <LENGTH>20</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>S_LGTYP</KEY>
+     <ENTRY>        Storage Type</ENTRY>
+     <LENGTH>20</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>S_MATNR</KEY>
+     <ENTRY>        Material</ENTRY>
+     <LENGTH>16</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>B01</KEY>
+     <ENTRY>Warehouse Selection</ENTRY>
+     <LENGTH>19</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>B02</KEY>
+     <ENTRY>Material and Movement</ENTRY>
+     <LENGTH>21</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>B03</KEY>
+     <ENTRY>Date Range</ENTRY>
+     <LENGTH>10</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>B04</KEY>
+     <ENTRY>Initial View</ENTRY>
+     <LENGTH>12</LENGTH>
+    </item>
+   </TPOOL>
+   <DYNPROS>
+    <item>
+     <HEADER>
+      <PROGRAM>ZWM_VISUAL_REPORT_GRAPH</PROGRAM>
+      <DYNPRO>0100</DYNPRO>
+      <LANGUAGE>E</LANGUAGE>
+     </HEADER>
+     <CONTAINERS>
+      <RPY_DYCATT>
+       <TYPE>CONTAINER</TYPE>
+       <NAME>CC_MAIN</NAME>
+       <ROW>1</ROW>
+       <COLUMN>1</COLUMN>
+       <HEIGHT>20</HEIGHT>
+       <WIDTH>200</WIDTH>
+       <VISLENGTH>200</VISLENGTH>
+       <VISHEIGHT>20</VISHEIGHT>
+       <RESIZING>X</RESIZING>
+       <V_RESIZE>X</V_RESIZE>
+       <H_RESIZE>X</H_RESIZE>
+      </RPY_DYCATT>
+     </CONTAINERS>
+     <FIELDS/>
+     <FLOW_LOGIC>PROCESS BEFORE OUTPUT.
+  MODULE status_0100.
+  MODULE init_screen.
+  MODULE display_alv.
+
+PROCESS AFTER INPUT.
+  MODULE user_command_0100.</FLOW_LOGIC>
+    </item>
+   </DYNPROS>
+   <GUI_STATUS>
+    <item>
+     <NAME>STATUS_GRAPH</NAME>
+     <FUNCT>
+      <item>
+       <CODE>BACK</CODE>
+       <TEXTNO>001</TEXTNO>
+       <ICON>ICON_SYSTEM_BACK</ICON>
+       <TEXT>Back</TEXT>
+       <TYPE>E</TYPE>
+      </item>
+      <item>
+       <CODE>EXIT</CODE>
+       <TEXTNO>002</TEXTNO>
+       <ICON>ICON_SYSTEM_END</ICON>
+       <TEXT>Exit</TEXT>
+       <TYPE>E</TYPE>
+      </item>
+      <item>
+       <CODE>CANC</CODE>
+       <TEXTNO>003</TEXTNO>
+       <ICON>ICON_CANCEL</ICON>
+       <TEXT>Cancel</TEXT>
+       <TYPE>E</TYPE>
+      </item>
+      <item>
+       <CODE>REFRESH</CODE>
+       <TEXTNO>004</TEXTNO>
+       <ICON>ICON_REFRESH</ICON>
+       <TEXT>Refresh</TEXT>
+       <TYPE>N</TYPE>
+      </item>
+      <item>
+       <CODE>VIEW_BINS</CODE>
+       <TEXTNO>005</TEXTNO>
+       <ICON>ICON_BIW_INFO_CUBE</ICON>
+       <TEXT>Bins</TEXT>
+       <TYPE>N</TYPE>
+      </item>
+      <item>
+       <CODE>VIEW_TO</CODE>
+       <TEXTNO>006</TEXTNO>
+       <ICON>ICON_TRANSFER</ICON>
+       <TEXT>TOs</TEXT>
+       <TYPE>N</TYPE>
+      </item>
+      <item>
+       <CODE>VIEW_KPI</CODE>
+       <TEXTNO>007</TEXTNO>
+       <ICON>ICON_TREND</ICON>
+       <TEXT>KPIs</TEXT>
+       <TYPE>N</TYPE>
+      </item>
+      <item>
+       <CODE>VIEW_STSUM</CODE>
+       <TEXTNO>008</TEXTNO>
+       <ICON>ICON_SUM</ICON>
+       <TEXT>Summary</TEXT>
+       <TYPE>N</TYPE>
+      </item>
+      <item>
+       <CODE>VIEW_DAILY</CODE>
+       <TEXTNO>009</TEXTNO>
+       <ICON>ICON_DATE</ICON>
+       <TEXT>Daily</TEXT>
+       <TYPE>N</TYPE>
+      </item>
+      <item>
+       <CODE>VIEW_USERS</CODE>
+       <TEXTNO>010</TEXTNO>
+       <ICON>ICON_EMPLOYEE</ICON>
+       <TEXT>Users</TEXT>
+       <TYPE>N</TYPE>
+      </item>
+     </FUNCT>
+     <PFKEYS>
+      <item>
+       <NAME>STANDARD</NAME>
+       <KEY001>BACK</KEY001>
+       <KEY012>CANC</KEY012>
+       <KEY015>EXIT</KEY015>
+      </item>
+     </PFKEYS>
+     <MENUS>
+      <item>
+       <NAME>WM_VIEWS</NAME>
+       <TEXT>Views</TEXT>
+       <ITEM001>VIEW_BINS</ITEM001>
+       <ITEM002>VIEW_TO</ITEM002>
+       <ITEM003>VIEW_KPI</ITEM003>
+       <ITEM004>VIEW_STSUM</ITEM004>
+       <ITEM005>VIEW_DAILY</ITEM005>
+       <ITEM006>VIEW_USERS</ITEM006>
+      </item>
+     </MENUS>
+     <TOOLBARS>
+      <item>
+       <NAME>APPLTOOL</NAME>
+       <BUTTON001>REFRESH</BUTTON001>
+       <BUTTON002>SEP</BUTTON002>
+       <BUTTON003>VIEW_BINS</BUTTON003>
+       <BUTTON004>VIEW_TO</BUTTON004>
+       <BUTTON005>VIEW_KPI</BUTTON005>
+       <BUTTON006>VIEW_STSUM</BUTTON006>
+       <BUTTON007>VIEW_DAILY</BUTTON007>
+       <BUTTON008>VIEW_USERS</BUTTON008>
+      </item>
+     </TOOLBARS>
+    </item>
+   </GUI_STATUS>
+   <GUI_TITLE>
+    <item>
+     <NAME>TITLE_GRAPH</NAME>
+     <TEXT>WM Visual Dashboard - Graphical</TEXT>
+    </item>
+   </GUI_TITLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>
