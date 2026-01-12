@@ -16,8 +16,15 @@ ENDMODULE.
 *& Module INIT_SCREEN OUTPUT
 *&---------------------------------------------------------------------*
 MODULE init_screen OUTPUT.
-  DATA: lt_html TYPE STANDARD TABLE OF char1000,
-        lv_url  TYPE char255.
+  DATA: lt_html      TYPE STANDARD TABLE OF w3html,
+        ls_html      TYPE w3html,
+        lv_url       TYPE c LENGTH 255,
+        lv_html_str  TYPE string,
+        lv_offset    TYPE i,
+        lv_len       TYPE i,
+        lv_remaining TYPE i.
+
+  DATA: lo_controller TYPE REF TO lcl_controller_graph.
 
   IF gv_graph_initialized = abap_false.
 
@@ -66,7 +73,7 @@ MODULE init_screen OUTPUT.
     ENDIF.
 
     " Set ALV container
-    DATA(lo_controller) = lcl_controller_graph=>get_instance( ).
+    lo_controller = lcl_controller_graph=>get_instance( ).
     lo_controller->mo_alv_handler->set_container( go_cont_alv ).
 
     gv_graph_initialized = abap_true.
@@ -74,24 +81,23 @@ MODULE init_screen OUTPUT.
 
   " Load dashboard HTML
   IF go_html_dashboard IS BOUND.
-    DATA(lo_ctrl) = lcl_controller_graph=>get_instance( ).
-    DATA(lv_html) = lo_ctrl->get_dashboard_html( ).
+    lo_controller = lcl_controller_graph=>get_instance( ).
+    lv_html_str = lo_controller->get_dashboard_html( ).
 
-    " Convert HTML string to table
+    " Convert HTML string to table (w3html has 255 chars)
     CLEAR lt_html.
-    DATA: lv_offset TYPE i VALUE 0,
-          lv_len    TYPE i,
-          lv_remaining TYPE i.
+    lv_offset = 0.
+    lv_remaining = strlen( lv_html_str ).
 
-    lv_remaining = strlen( lv_html ).
     WHILE lv_remaining > 0.
-      IF lv_remaining > 1000.
-        lv_len = 1000.
+      IF lv_remaining > 255.
+        lv_len = 255.
       ELSE.
         lv_len = lv_remaining.
       ENDIF.
 
-      APPEND lv_html+lv_offset(lv_len) TO lt_html.
+      ls_html = lv_html_str+lv_offset(lv_len).
+      APPEND ls_html TO lt_html.
       lv_offset = lv_offset + lv_len.
       lv_remaining = lv_remaining - lv_len.
     ENDWHILE.
@@ -111,6 +117,7 @@ ENDMODULE.
 *& Module DISPLAY_ALV OUTPUT
 *&---------------------------------------------------------------------*
 MODULE display_alv OUTPUT.
-  DATA(lo_controller) = lcl_controller_graph=>get_instance( ).
-  lo_controller->display_current_view( ).
+  DATA: lo_ctrl TYPE REF TO lcl_controller_graph.
+  lo_ctrl = lcl_controller_graph=>get_instance( ).
+  lo_ctrl->display_current_view( ).
 ENDMODULE.
