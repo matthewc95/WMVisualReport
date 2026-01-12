@@ -292,7 +292,10 @@ CLASS lcl_html_dashboard_modern IMPLEMENTATION.
   METHOD generate_dashboard_html.
     DATA: lv_occ_pct    TYPE p LENGTH 5 DECIMALS 1,
           lv_conf_pct   TYPE p LENGTH 5 DECIMALS 1,
-          lv_open_pct   TYPE p LENGTH 5 DECIMALS 1.
+          lv_open_pct   TYPE p LENGTH 5 DECIMALS 1,
+          lv_speed_pct  TYPE p LENGTH 5 DECIMALS 1,
+          lv_occ_color  TYPE string,
+          lv_speed_color TYPE string.
 
     IF iv_total_bins > 0.
       lv_occ_pct = ( iv_occupied_bins / iv_total_bins ) * 100.
@@ -300,6 +303,31 @@ CLASS lcl_html_dashboard_modern IMPLEMENTATION.
     IF iv_total_to > 0.
       lv_conf_pct = ( iv_confirmed_to / iv_total_to ) * 100.
       lv_open_pct = ( iv_open_to / iv_total_to ) * 100.
+    ENDIF.
+
+    " Calculate speed percentage
+    IF iv_avg_confirm_time > 0.
+      lv_speed_pct = 100 - ( iv_avg_confirm_time / 12 * 100 ).
+      IF lv_speed_pct < 0. lv_speed_pct = 0. ENDIF.
+    ELSE.
+      lv_speed_pct = 100.
+    ENDIF.
+
+    " Determine colors
+    IF lv_occ_pct >= 85.
+      lv_occ_color = '#e74c3c'.
+    ELSEIF lv_occ_pct >= 60.
+      lv_occ_color = '#f39c12'.
+    ELSE.
+      lv_occ_color = '#27ae60'.
+    ENDIF.
+
+    IF iv_avg_confirm_time > 8.
+      lv_speed_color = '#e74c3c'.
+    ELSEIF iv_avg_confirm_time > 4.
+      lv_speed_color = '#f39c12'.
+    ELSE.
+      lv_speed_color = '#27ae60'.
     ENDIF.
 
     " Build modern HTML dashboard
@@ -384,23 +412,15 @@ CLASS lcl_html_dashboard_modern IMPLEMENTATION.
       generate_progress_ring(
         iv_percentage = lv_occ_pct
         iv_label      = 'Occupancy'
-        iv_color      = COND #(
-          WHEN lv_occ_pct >= 85 THEN '#e74c3c'
-          WHEN lv_occ_pct >= 60 THEN '#f39c12'
-          ELSE '#27ae60' ) ) &&
+        iv_color      = lv_occ_color ) &&
       generate_progress_ring(
         iv_percentage = lv_conf_pct
         iv_label      = 'Completion'
         iv_color      = '#27ae60' ) &&
       generate_progress_ring(
-        iv_percentage = COND #( WHEN iv_avg_confirm_time > 0
-                                THEN 100 - ( iv_avg_confirm_time / 12 * 100 )
-                                ELSE 100 )
+        iv_percentage = lv_speed_pct
         iv_label      = 'Speed'
-        iv_color      = COND #(
-          WHEN iv_avg_confirm_time > 8 THEN '#e74c3c'
-          WHEN iv_avg_confirm_time > 4 THEN '#f39c12'
-          ELSE '#27ae60' ) ) &&
+        iv_color      = lv_speed_color ) &&
       |</div>| &&
 
       " Status Bar
