@@ -9,10 +9,15 @@
 *&---------------------------------------------------------------------*
 MODULE user_command_0100 INPUT.
   DATA: lo_ctrl_pai TYPE REF TO lcl_controller_graph.
+  DATA: lv_ucomm TYPE sy-ucomm.
+
+  " Get function code from sy-ucomm (standard SAP variable)
+  lv_ucomm = sy-ucomm.
+  CLEAR sy-ucomm.
 
   lo_ctrl_pai = lcl_controller_graph=>get_instance( ).
 
-  CASE gv_okcode_graph.
+  CASE lv_ucomm.
     WHEN 'BACK' OR 'EXIT' OR 'CANC'.
       " Free objects
       IF go_html_dashboard IS BOUND.
@@ -36,23 +41,27 @@ MODULE user_command_0100 INPUT.
 
     WHEN 'VIEW_BINS'.
       lo_ctrl_pai->set_view( 1 ).
+      gv_graph_initialized = abap_false.
 
     WHEN 'VIEW_TO'.
       lo_ctrl_pai->set_view( 2 ).
+      gv_graph_initialized = abap_false.
 
     WHEN 'VIEW_KPI'.
       lo_ctrl_pai->set_view( 3 ).
+      gv_graph_initialized = abap_false.
 
     WHEN 'VIEW_STSUM'.
       lo_ctrl_pai->set_view( 4 ).
+      gv_graph_initialized = abap_false.
 
     WHEN 'VIEW_DAILY'.
       lo_ctrl_pai->set_view( 5 ).
+      gv_graph_initialized = abap_false.
 
     WHEN 'VIEW_USERS'.
       lo_ctrl_pai->set_view( 6 ).
+      gv_graph_initialized = abap_false.
 
   ENDCASE.
-
-  CLEAR gv_okcode_graph.
 ENDMODULE.
