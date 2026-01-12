@@ -8,7 +8,9 @@
 *& Module USER_COMMAND_0100 INPUT
 *&---------------------------------------------------------------------*
 MODULE user_command_0100 INPUT.
-  DATA(lo_controller) = lcl_controller_graph=>get_instance( ).
+  DATA: lo_ctrl_pai TYPE REF TO lcl_controller_graph.
+
+  lo_ctrl_pai = lcl_controller_graph=>get_instance( ).
 
   CASE gv_okcode_graph.
     WHEN 'BACK' OR 'EXIT' OR 'CANC'.
@@ -29,26 +31,26 @@ MODULE user_command_0100 INPUT.
 
     WHEN 'REFRESH'.
       " Refresh data
-      lo_controller->refresh_data( ).
+      lo_ctrl_pai->refresh_data( ).
       gv_graph_initialized = abap_false.
 
     WHEN 'VIEW_BINS'.
-      lo_controller->set_view( 1 ).
+      lo_ctrl_pai->set_view( 1 ).
 
     WHEN 'VIEW_TO'.
-      lo_controller->set_view( 2 ).
+      lo_ctrl_pai->set_view( 2 ).
 
     WHEN 'VIEW_KPI'.
-      lo_controller->set_view( 3 ).
+      lo_ctrl_pai->set_view( 3 ).
 
     WHEN 'VIEW_STSUM'.
-      lo_controller->set_view( 4 ).
+      lo_ctrl_pai->set_view( 4 ).
 
     WHEN 'VIEW_DAILY'.
-      lo_controller->set_view( 5 ).
+      lo_ctrl_pai->set_view( 5 ).
 
     WHEN 'VIEW_USERS'.
-      lo_controller->set_view( 6 ).
+      lo_ctrl_pai->set_view( 6 ).
 
   ENDCASE.
 
