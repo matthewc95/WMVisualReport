@@ -627,8 +627,15 @@ CLASS lcl_alv_handler_graph DEFINITION FINAL.
       go_instance TYPE REF TO lcl_alv_handler_graph.
 
     DATA:
-      mo_salv     TYPE REF TO cl_salv_table,
-      mo_container TYPE REF TO cl_gui_container.
+      mo_salv      TYPE REF TO cl_salv_table,
+      mo_container TYPE REF TO cl_gui_container,
+      " Instance data tables - must persist for ALV scrolling
+      mt_bins      TYPE gty_storage_bins_graph,
+      mt_orders    TYPE gty_transfer_orders_graph,
+      mt_kpis      TYPE gty_movement_kpis_graph,
+      mt_stsum     TYPE gty_storage_type_sums_graph,
+      mt_daily     TYPE gty_daily_stats_graph,
+      mt_users     TYPE gty_user_workloads_graph.
 
     CLASS-METHODS:
       get_instance
@@ -700,8 +707,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_bins_graph.
-    DATA: lt_display TYPE gty_storage_bins_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_bins = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -711,13 +718,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_bins ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_bins ).
         ENDIF.
 
         setup_alv_common(
@@ -739,8 +746,17 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_short_text( 'Type' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) )->set_short_text( 'Bin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGBER' ) )->set_short_text( 'Area' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LPTYP' ) )->set_short_text( 'BinTy' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAXLE' ) )->set_short_text( 'MaxSU' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'ANZLE' ) )->set_short_text( 'CurSU' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VERME' ) )->set_short_text( 'AvlQty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'GESME' ) )->set_short_text( 'TotQty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_short_text( 'UoM' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) )->set_short_text( 'Occ%' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'St' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_short_text( 'Matnr' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) )->set_short_text( '#Mat' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) )->set_short_text( '#Qnt' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED' ) )->set_short_text( 'Blk' ).
           CATCH cx_salv_not_found.
@@ -763,8 +779,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_orders_graph.
-    DATA: lt_display TYPE gty_transfer_orders_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_orders = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -774,13 +790,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_orders ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_orders ).
         ENDIF.
 
         setup_alv_common(
@@ -799,12 +815,27 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
 
         " Column headings
         TRY.
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'TANUM' ) )->set_short_text( 'TO#' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'TAPOS' ) )->set_short_text( 'Item' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_short_text( 'MvT' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'REFNR' ) )->set_short_text( 'RefNo' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'NLTYP' ) )->set_short_text( 'DestTy' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'NLPLA' ) )->set_short_text( 'DestBin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VLTYP' ) )->set_short_text( 'SrcTy' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'VLPLA' ) )->set_short_text( 'SrcBin' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_short_text( 'Material' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'WERKS' ) )->set_short_text( 'Plant' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAKTX' ) )->set_short_text( 'Descr' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAKTX' ) )->set_medium_text( 'Description' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'VSOLM' ) )->set_short_text( 'Qty' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'WAIT_HOURS' ) )->set_short_text( 'Wait h' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_short_text( 'UoM' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BDATU' ) )->set_short_text( 'CrDate' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BZEIT' ) )->set_short_text( 'CrTime' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QDATU' ) )->set_short_text( 'CnfDat' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QZEIT' ) )->set_short_text( 'CnfTim' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) )->set_short_text( 'User' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'WAIT_HOURS' ) )->set_short_text( 'WaitHr' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'STATUS' ) )->set_short_text( 'Status' ).
             CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'St' ).
           CATCH cx_salv_not_found.
@@ -838,8 +869,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_kpis_graph.
-    DATA: lt_display TYPE gty_movement_kpis_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_kpis = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -849,13 +880,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_kpis ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_kpis ).
         ENDIF.
 
         setup_alv_common(
@@ -871,6 +902,23 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
+        " Column headings
+        TRY.
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_short_text( 'MvT' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS_TXT' ) )->set_short_text( 'Descr' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS_TXT' ) )->set_medium_text( 'Description' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_COUNT' ) )->set_short_text( 'Total' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_short_text( 'Conf' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_OPEN' ) )->set_short_text( 'Open' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_short_text( 'AvgHrs' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MIN_TIME_HOURS' ) )->set_short_text( 'MinHrs' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'MAX_TIME_HOURS' ) )->set_short_text( 'MaxHrs' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_short_text( 'TotQty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'St' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         mo_salv->display( ).
 
       CATCH cx_salv_msg INTO DATA(lx_msg).
@@ -879,8 +927,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_stsum_graph.
-    DATA: lt_display TYPE gty_storage_type_sums_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_stsum = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -890,13 +938,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_stsum ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_stsum ).
         ENDIF.
 
         setup_alv_common(
@@ -912,6 +960,24 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
+        " Column headings
+        TRY.
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_short_text( 'Type' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP_TXT' ) )->set_short_text( 'Descr' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP_TXT' ) )->set_medium_text( 'Description' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_BINS' ) )->set_short_text( 'TotBin' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPIED_BINS' ) )->set_short_text( 'Occup' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'EMPTY_BINS' ) )->set_short_text( 'Empty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED_BINS' ) )->set_short_text( 'Block' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QUANTS' ) )->set_short_text( 'Quants' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY_PCT' ) )->set_short_text( 'Occ%' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'St' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_GRAPH' ) )->set_short_text( 'Graph' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_GRAPH' ) )->set_medium_text( 'Occupancy Graph' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         mo_salv->display( ).
 
       CATCH cx_salv_msg INTO DATA(lx_msg).
@@ -920,8 +986,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_daily_graph.
-    DATA: lt_display TYPE gty_daily_stats_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_daily = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -931,13 +997,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_daily ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_daily ).
         ENDIF.
 
         setup_alv_common(
@@ -952,6 +1018,21 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
+        " Column headings
+        TRY.
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'DATE' ) )->set_short_text( 'Date' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'DAY_NAME' ) )->set_short_text( 'Day' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CREATED' ) )->set_short_text( 'Create' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_short_text( 'Conf' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_CONFIRM_HRS' ) )->set_short_text( 'AvgHrs' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_short_text( 'TotQty' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'PEAK_HOUR' ) )->set_short_text( 'Peak' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CREATED' ) )->set_short_text( 'Created' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CONFIRMED' ) )->set_short_text( 'Confirmed' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         mo_salv->display( ).
 
       CATCH cx_salv_msg INTO DATA(lx_msg).
@@ -960,8 +1041,8 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD display_users_graph.
-    DATA: lt_display TYPE gty_user_workloads_graph.
-    lt_display = it_data.
+    " Store data in instance variable to persist for ALV scrolling
+    mt_users = it_data.
 
     TRY.
         IF mo_container IS BOUND.
@@ -971,13 +1052,13 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             IMPORTING
               r_salv_table   = mo_salv
             CHANGING
-              t_table        = lt_display ).
+              t_table        = mt_users ).
         ELSE.
           cl_salv_table=>factory(
             IMPORTING
               r_salv_table = mo_salv
             CHANGING
-              t_table      = lt_display ).
+              t_table      = mt_users ).
         ENDIF.
 
         setup_alv_common(
@@ -990,6 +1071,21 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
             lo_columns->set_color_column( 'CELLCOLOR' ).
             lo_columns->get_column( 'CELLCOLOR' )->set_visible( abap_false ).
           CATCH cx_salv_not_found cx_salv_data_error.
+        ENDTRY.
+
+        " Column headings
+        TRY.
+            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) )->set_short_text( 'User' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'USER_NAME' ) )->set_short_text( 'Name' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'USER_NAME' ) )->set_medium_text( 'User Name' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_short_text( 'Conf' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_medium_text( 'TOs Confirmed' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'ITEMS_PROCESSED' ) )->set_short_text( 'Items' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_short_text( 'AvgHrs' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'EFFICIENCY' ) )->set_short_text( 'Eff%' ).
+            CAST cl_salv_column_table( lo_columns->get_column( 'EFFICIENCY' ) )->set_medium_text( 'Efficiency %' ).
+          CATCH cx_salv_not_found.
         ENDTRY.
 
         mo_salv->display( ).
