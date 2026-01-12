@@ -733,11 +733,12 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
 
         DATA(lo_columns) = mo_salv->get_columns( ).
 
-        " Set color column
+        " Set color column and hide technical columns
         TRY.
             lo_columns->set_color_column( 'CELLCOLOR' ).
             lo_columns->get_column( 'CELLCOLOR' )->set_visible( abap_false ).
             lo_columns->get_column( 'STATUS' )->set_visible( abap_false ).
+            lo_columns->get_column( 'STATUS_ICON' )->set_visible( abap_false ).
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
@@ -837,11 +838,12 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
 
         DATA(lo_columns) = mo_salv->get_columns( ).
 
-        " Set color column
+        " Set color column and hide technical columns
         TRY.
             lo_columns->set_color_column( 'CELLCOLOR' ).
             lo_columns->get_column( 'CELLCOLOR' )->set_visible( abap_false ).
             lo_columns->get_column( 'CONFIRMED' )->set_visible( abap_false ).
+            lo_columns->get_column( 'STATUS_ICON' )->set_visible( abap_false ).
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
@@ -970,10 +972,12 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
 
         DATA(lo_columns) = mo_salv->get_columns( ).
 
+        " Hide technical columns
         TRY.
             lo_columns->set_color_column( 'CELLCOLOR' ).
             lo_columns->get_column( 'CELLCOLOR' )->set_visible( abap_false ).
             lo_columns->get_column( 'STATUS' )->set_visible( abap_false ).
+            lo_columns->get_column( 'STATUS_ICON' )->set_visible( abap_false ).
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 
@@ -1049,10 +1053,12 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
 
         DATA(lo_columns) = mo_salv->get_columns( ).
 
+        " Hide technical columns
         TRY.
             lo_columns->set_color_column( 'CELLCOLOR' ).
             lo_columns->get_column( 'CELLCOLOR' )->set_visible( abap_false ).
             lo_columns->get_column( 'STATUS' )->set_visible( abap_false ).
+            lo_columns->get_column( 'STATUS_ICON' )->set_visible( abap_false ).
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
 

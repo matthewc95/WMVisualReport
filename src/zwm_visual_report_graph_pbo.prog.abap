@@ -118,14 +118,20 @@ ENDMODULE.
 *&---------------------------------------------------------------------*
 MODULE display_alv OUTPUT.
   DATA: lo_ctrl TYPE REF TO lcl_controller_graph.
+  STATICS: sv_last_view TYPE i VALUE 0.
 
   lo_ctrl = lcl_controller_graph=>get_instance( ).
 
-  " Free previous SALV instance before creating new one
-  IF lo_ctrl->mo_alv_handler->mo_salv IS BOUND.
-    lo_ctrl->mo_alv_handler->mo_salv->close_screen( ).
-    FREE lo_ctrl->mo_alv_handler->mo_salv.
-  ENDIF.
+  " Only recreate ALV if view changed or first time
+  IF sv_last_view <> lo_ctrl->get_current_view( ) OR
+     lo_ctrl->mo_alv_handler->mo_salv IS NOT BOUND.
 
-  lo_ctrl->display_current_view( ).
+    " Free previous SALV instance
+    IF lo_ctrl->mo_alv_handler->mo_salv IS BOUND.
+      FREE lo_ctrl->mo_alv_handler->mo_salv.
+    ENDIF.
+
+    lo_ctrl->display_current_view( ).
+    sv_last_view = lo_ctrl->get_current_view( ).
+  ENDIF.
 ENDMODULE.
