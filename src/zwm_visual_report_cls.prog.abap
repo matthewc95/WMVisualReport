@@ -127,7 +127,7 @@ CLASS lcl_utilities IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_day_name.
-    DATA: lv_day_num TYPE dtresr-weekday.
+    DATA: lv_day_num TYPE scal-indicator.
 
     CALL FUNCTION 'DATE_COMPUTE_DAY'
       EXPORTING
@@ -135,15 +135,16 @@ CLASS lcl_utilities IMPLEMENTATION.
       IMPORTING
         day  = lv_day_num.
 
-    rv_day = SWITCH #( lv_day_num
-      WHEN '1' THEN 'Monday'
-      WHEN '2' THEN 'Tuesday'
-      WHEN '3' THEN 'Wednesday'
-      WHEN '4' THEN 'Thursday'
-      WHEN '5' THEN 'Friday'
-      WHEN '6' THEN 'Saturday'
-      WHEN '7' THEN 'Sunday'
-      ELSE 'Unknown' ).
+    CASE lv_day_num.
+      WHEN '1'. rv_day = 'Monday'.
+      WHEN '2'. rv_day = 'Tuesday'.
+      WHEN '3'. rv_day = 'Wednesday'.
+      WHEN '4'. rv_day = 'Thursday'.
+      WHEN '5'. rv_day = 'Friday'.
+      WHEN '6'. rv_day = 'Saturday'.
+      WHEN '7'. rv_day = 'Sunday'.
+      WHEN OTHERS. rv_day = 'Unknown'.
+    ENDCASE.
   ENDMETHOD.
 
 ENDCLASS.
@@ -1380,20 +1381,121 @@ CLASS lcl_alv_handler IMPLEMENTATION.
           CATCH cx_salv_not_found.
         ENDTRY.
 
-        " Set column texts
+        " Set column texts with full headings
         TRY.
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_short_text( 'StTyp' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) )->set_short_text( 'Bin' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) )->set_short_text( 'Occ%' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'Status' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) )->set_short_text( 'Quants' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) )->set_short_text( '#Mat' ).
+            DATA(lo_col_lgnum) = CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) ).
+            lo_col_lgnum->set_short_text( 'Whse' ).
+            lo_col_lgnum->set_medium_text( 'Warehouse' ).
+            lo_col_lgnum->set_long_text( 'Warehouse Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_lgtyp) = CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) ).
+            lo_col_lgtyp->set_short_text( 'StTyp' ).
+            lo_col_lgtyp->set_medium_text( 'Stor.Type' ).
+            lo_col_lgtyp->set_long_text( 'Storage Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_lgpla) = CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) ).
+            lo_col_lgpla->set_short_text( 'Bin' ).
+            lo_col_lgpla->set_medium_text( 'Storage Bin' ).
+            lo_col_lgpla->set_long_text( 'Storage Bin' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_lgber) = CAST cl_salv_column_table( lo_columns->get_column( 'LGBER' ) ).
+            lo_col_lgber->set_short_text( 'Sect' ).
+            lo_col_lgber->set_medium_text( 'Section' ).
+            lo_col_lgber->set_long_text( 'Storage Section' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_lptyp) = CAST cl_salv_column_table( lo_columns->get_column( 'LPTYP' ) ).
+            lo_col_lptyp->set_short_text( 'BnTyp' ).
+            lo_col_lptyp->set_medium_text( 'Bin Type' ).
+            lo_col_lptyp->set_long_text( 'Storage Bin Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_maxle) = CAST cl_salv_column_table( lo_columns->get_column( 'MAXLE' ) ).
+            lo_col_maxle->set_short_text( 'MaxCap' ).
+            lo_col_maxle->set_medium_text( 'Max Capacity' ).
+            lo_col_maxle->set_long_text( 'Maximum Capacity (LE)' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_anzle) = CAST cl_salv_column_table( lo_columns->get_column( 'ANZLE' ) ).
+            lo_col_anzle->set_short_text( 'CurLE' ).
+            lo_col_anzle->set_medium_text( 'Current LE' ).
+            lo_col_anzle->set_long_text( 'Current LE Count' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_occupancy) = CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) ).
+            lo_col_occupancy->set_short_text( 'Occ%' ).
+            lo_col_occupancy->set_medium_text( 'Occupancy%' ).
+            lo_col_occupancy->set_long_text( 'Occupancy Percentage' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_status_icon) = CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) ).
+            lo_col_status_icon->set_short_text( 'St' ).
+            lo_col_status_icon->set_medium_text( 'Status' ).
+            lo_col_status_icon->set_long_text( 'Status Indicator' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_verme) = CAST cl_salv_column_table( lo_columns->get_column( 'VERME' ) ).
+            lo_col_verme->set_short_text( 'AvlQty' ).
+            lo_col_verme->set_medium_text( 'Available Qty' ).
+            lo_col_verme->set_long_text( 'Available Quantity' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_gesme) = CAST cl_salv_column_table( lo_columns->get_column( 'GESME' ) ).
+            lo_col_gesme->set_short_text( 'TotQty' ).
+            lo_col_gesme->set_medium_text( 'Total Qty' ).
+            lo_col_gesme->set_long_text( 'Total Quantity' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_meins) = CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) ).
+            lo_col_meins->set_short_text( 'UoM' ).
+            lo_col_meins->set_medium_text( 'Unit' ).
+            lo_col_meins->set_long_text( 'Unit of Measure' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_matnr) = CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) ).
+            lo_col_matnr->set_short_text( 'Material' ).
+            lo_col_matnr->set_medium_text( 'Material No' ).
+            lo_col_matnr->set_long_text( 'Material Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_quant_count) = CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) ).
+            lo_col_quant_count->set_short_text( '#Quant' ).
+            lo_col_quant_count->set_medium_text( 'No.Quants' ).
+            lo_col_quant_count->set_long_text( 'Number of Quants' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_mat_count) = CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) ).
+            lo_col_mat_count->set_short_text( '#Mat' ).
+            lo_col_mat_count->set_medium_text( 'No.Materials' ).
+            lo_col_mat_count->set_long_text( 'Number of Materials' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_blocked) = CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED' ) ).
+            lo_col_blocked->set_short_text( 'Block' ).
+            lo_col_blocked->set_medium_text( 'Blocked' ).
+            lo_col_blocked->set_long_text( 'Blocked Indicator' ).
           CATCH cx_salv_not_found.
         ENDTRY.
 
-        " Set color
-        lo_columns->set_color_column( 'COLOR' ).
+        " Note: set_color_column removed - requires LVC_T_SCOL type field
 
         " Enable sorting and filtering
         DATA(lo_functions) = mo_salv->get_functions( ).
@@ -1402,7 +1504,7 @@ CLASS lcl_alv_handler IMPLEMENTATION.
         " Set zebra
         DATA(lo_display) = mo_salv->get_display_settings( ).
         lo_display->set_striped_pattern( abap_true ).
-        lo_display->set_list_header( 'Storage Bin Overview' ).
+        lo_display->set_list_header( 'Storage Bin Overview - Bin Status and Occupancy' ).
 
         " Display
         mo_salv->display( ).
@@ -1431,23 +1533,170 @@ CLASS lcl_alv_handler IMPLEMENTATION.
           CATCH cx_salv_not_found.
         ENDTRY.
 
+        " Set column headings
         TRY.
-            CAST cl_salv_column_table( lo_columns->get_column( 'TANUM' ) )->set_short_text( 'TO#' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TAPOS' ) )->set_short_text( 'Item' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_short_text( 'MvT' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'St' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'WAIT_HOURS' ) )->set_short_text( 'Wait(h)' ).
+            DATA(lo_col_tanum) = CAST cl_salv_column_table( lo_columns->get_column( 'TANUM' ) ).
+            lo_col_tanum->set_short_text( 'TO#' ).
+            lo_col_tanum->set_medium_text( 'TO Number' ).
+            lo_col_tanum->set_long_text( 'Transfer Order Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_tapos) = CAST cl_salv_column_table( lo_columns->get_column( 'TAPOS' ) ).
+            lo_col_tapos->set_short_text( 'Item' ).
+            lo_col_tapos->set_medium_text( 'Item No' ).
+            lo_col_tapos->set_long_text( 'Item Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_lgnum) = CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) ).
+            lo_col_lgnum->set_short_text( 'Whse' ).
+            lo_col_lgnum->set_medium_text( 'Warehouse' ).
+            lo_col_lgnum->set_long_text( 'Warehouse Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bwlvs) = CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) ).
+            lo_col_bwlvs->set_short_text( 'MvT' ).
+            lo_col_bwlvs->set_medium_text( 'Mov.Type' ).
+            lo_col_bwlvs->set_long_text( 'Movement Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_status) = CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) ).
+            lo_col_status->set_short_text( 'St' ).
+            lo_col_status->set_medium_text( 'Status' ).
+            lo_col_status->set_long_text( 'Status Indicator' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_wait) = CAST cl_salv_column_table( lo_columns->get_column( 'WAIT_HOURS' ) ).
+            lo_col_wait->set_short_text( 'Wait(h)' ).
+            lo_col_wait->set_medium_text( 'Wait Hours' ).
+            lo_col_wait->set_long_text( 'Waiting Time (Hours)' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_matnr) = CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) ).
+            lo_col_matnr->set_short_text( 'Material' ).
+            lo_col_matnr->set_medium_text( 'Material No' ).
+            lo_col_matnr->set_long_text( 'Material Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_maktx) = CAST cl_salv_column_table( lo_columns->get_column( 'MAKTX' ) ).
+            lo_col_maktx->set_short_text( 'Desc' ).
+            lo_col_maktx->set_medium_text( 'Description' ).
+            lo_col_maktx->set_long_text( 'Material Description' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_vsolm) = CAST cl_salv_column_table( lo_columns->get_column( 'VSOLM' ) ).
+            lo_col_vsolm->set_short_text( 'Qty' ).
+            lo_col_vsolm->set_medium_text( 'Quantity' ).
+            lo_col_vsolm->set_long_text( 'Source Quantity' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_meins) = CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) ).
+            lo_col_meins->set_short_text( 'UoM' ).
+            lo_col_meins->set_medium_text( 'Unit' ).
+            lo_col_meins->set_long_text( 'Unit of Measure' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_vltyp) = CAST cl_salv_column_table( lo_columns->get_column( 'VLTYP' ) ).
+            lo_col_vltyp->set_short_text( 'SrcTy' ).
+            lo_col_vltyp->set_medium_text( 'Source Type' ).
+            lo_col_vltyp->set_long_text( 'Source Storage Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_vlpla) = CAST cl_salv_column_table( lo_columns->get_column( 'VLPLA' ) ).
+            lo_col_vlpla->set_short_text( 'SrcBin' ).
+            lo_col_vlpla->set_medium_text( 'Source Bin' ).
+            lo_col_vlpla->set_long_text( 'Source Storage Bin' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_nltyp) = CAST cl_salv_column_table( lo_columns->get_column( 'NLTYP' ) ).
+            lo_col_nltyp->set_short_text( 'DstTy' ).
+            lo_col_nltyp->set_medium_text( 'Dest. Type' ).
+            lo_col_nltyp->set_long_text( 'Destination Storage Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_nlpla) = CAST cl_salv_column_table( lo_columns->get_column( 'NLPLA' ) ).
+            lo_col_nlpla->set_short_text( 'DstBin' ).
+            lo_col_nlpla->set_medium_text( 'Dest. Bin' ).
+            lo_col_nlpla->set_long_text( 'Destination Storage Bin' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bdatu) = CAST cl_salv_column_table( lo_columns->get_column( 'BDATU' ) ).
+            lo_col_bdatu->set_short_text( 'CrDate' ).
+            lo_col_bdatu->set_medium_text( 'Created On' ).
+            lo_col_bdatu->set_long_text( 'Creation Date' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bzeit) = CAST cl_salv_column_table( lo_columns->get_column( 'BZEIT' ) ).
+            lo_col_bzeit->set_short_text( 'CrTime' ).
+            lo_col_bzeit->set_medium_text( 'Created At' ).
+            lo_col_bzeit->set_long_text( 'Creation Time' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_qdatu) = CAST cl_salv_column_table( lo_columns->get_column( 'QDATU' ) ).
+            lo_col_qdatu->set_short_text( 'CfDate' ).
+            lo_col_qdatu->set_medium_text( 'Confirmed On' ).
+            lo_col_qdatu->set_long_text( 'Confirmation Date' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_qzeit) = CAST cl_salv_column_table( lo_columns->get_column( 'QZEIT' ) ).
+            lo_col_qzeit->set_short_text( 'CfTime' ).
+            lo_col_qzeit->set_medium_text( 'Confirmed At' ).
+            lo_col_qzeit->set_long_text( 'Confirmation Time' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_qname) = CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) ).
+            lo_col_qname->set_short_text( 'ConfBy' ).
+            lo_col_qname->set_medium_text( 'Confirmed By' ).
+            lo_col_qname->set_long_text( 'Confirmed By User' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_status_txt) = CAST cl_salv_column_table( lo_columns->get_column( 'STATUS' ) ).
+            lo_col_status_txt->set_short_text( 'StatTxt' ).
+            lo_col_status_txt->set_medium_text( 'Status Text' ).
+            lo_col_status_txt->set_long_text( 'Status Description' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_refnr) = CAST cl_salv_column_table( lo_columns->get_column( 'REFNR' ) ).
+            lo_col_refnr->set_short_text( 'Ref' ).
+            lo_col_refnr->set_medium_text( 'Reference' ).
+            lo_col_refnr->set_long_text( 'Reference Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_werks) = CAST cl_salv_column_table( lo_columns->get_column( 'WERKS' ) ).
+            lo_col_werks->set_short_text( 'Plant' ).
+            lo_col_werks->set_medium_text( 'Plant' ).
+            lo_col_werks->set_long_text( 'Plant' ).
           CATCH cx_salv_not_found.
         ENDTRY.
 
-        lo_columns->set_color_column( 'COLOR' ).
+        " Note: set_color_column removed - requires LVC_T_SCOL type field
 
         DATA(lo_functions) = mo_salv->get_functions( ).
         lo_functions->set_all( abap_true ).
 
         DATA(lo_display) = mo_salv->get_display_settings( ).
         lo_display->set_striped_pattern( abap_true ).
-        lo_display->set_list_header( 'Transfer Orders' ).
+        lo_display->set_list_header( 'Transfer Orders - Open and Confirmed TOs in Selection Period' ).
 
         " Set events for double click
         DATA(lo_events) = mo_salv->get_event( ).
@@ -1478,12 +1727,91 @@ CLASS lcl_alv_handler IMPLEMENTATION.
           CATCH cx_salv_not_found.
         ENDTRY.
 
+        " Set column headings
+        TRY.
+            DATA(lo_col_lgnum) = CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) ).
+            lo_col_lgnum->set_short_text( 'Whse' ).
+            lo_col_lgnum->set_medium_text( 'Warehouse' ).
+            lo_col_lgnum->set_long_text( 'Warehouse Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_lgtyp) = CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) ).
+            lo_col_lgtyp->set_short_text( 'StTyp' ).
+            lo_col_lgtyp->set_medium_text( 'Stor.Type' ).
+            lo_col_lgtyp->set_long_text( 'Storage Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_lgtyp_txt) = CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP_TXT' ) ).
+            lo_col_lgtyp_txt->set_short_text( 'TypeTxt' ).
+            lo_col_lgtyp_txt->set_medium_text( 'Type Descr' ).
+            lo_col_lgtyp_txt->set_long_text( 'Storage Type Description' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_total) = CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_BINS' ) ).
+            lo_col_total->set_short_text( 'Total' ).
+            lo_col_total->set_medium_text( 'Total Bins' ).
+            lo_col_total->set_long_text( 'Total Number of Bins' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_occ) = CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPIED_BINS' ) ).
+            lo_col_occ->set_short_text( 'Occup' ).
+            lo_col_occ->set_medium_text( 'Occupied' ).
+            lo_col_occ->set_long_text( 'Occupied Bins' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_empty) = CAST cl_salv_column_table( lo_columns->get_column( 'EMPTY_BINS' ) ).
+            lo_col_empty->set_short_text( 'Empty' ).
+            lo_col_empty->set_medium_text( 'Empty Bins' ).
+            lo_col_empty->set_long_text( 'Empty Bins' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_blocked) = CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED_BINS' ) ).
+            lo_col_blocked->set_short_text( 'Block' ).
+            lo_col_blocked->set_medium_text( 'Blocked' ).
+            lo_col_blocked->set_long_text( 'Blocked Bins' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_quants) = CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QUANTS' ) ).
+            lo_col_quants->set_short_text( 'Quants' ).
+            lo_col_quants->set_medium_text( 'Tot.Quants' ).
+            lo_col_quants->set_long_text( 'Total Quants' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_pct) = CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY_PCT' ) ).
+            lo_col_pct->set_short_text( 'Occ%' ).
+            lo_col_pct->set_medium_text( 'Occupancy%' ).
+            lo_col_pct->set_long_text( 'Occupancy Percentage' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_icon) = CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) ).
+            lo_col_icon->set_short_text( 'St' ).
+            lo_col_icon->set_medium_text( 'Status' ).
+            lo_col_icon->set_long_text( 'Status Indicator' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bar) = CAST cl_salv_column_table( lo_columns->get_column( 'BAR_GRAPH' ) ).
+            lo_col_bar->set_short_text( 'Graph' ).
+            lo_col_bar->set_medium_text( 'Occupancy Bar' ).
+            lo_col_bar->set_long_text( 'Occupancy Bar Graph' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         DATA(lo_functions) = mo_salv->get_functions( ).
         lo_functions->set_all( abap_true ).
 
         DATA(lo_display) = mo_salv->get_display_settings( ).
         lo_display->set_striped_pattern( abap_true ).
-        lo_display->set_list_header( 'Storage Type Summary' ).
+        lo_display->set_list_header( 'Storage Type Summary - Bin Distribution by Storage Type' ).
 
         mo_salv->display( ).
 
@@ -1510,12 +1838,91 @@ CLASS lcl_alv_handler IMPLEMENTATION.
           CATCH cx_salv_not_found.
         ENDTRY.
 
+        " Set column headings
+        TRY.
+            DATA(lo_col_lgnum) = CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) ).
+            lo_col_lgnum->set_short_text( 'Whse' ).
+            lo_col_lgnum->set_medium_text( 'Warehouse' ).
+            lo_col_lgnum->set_long_text( 'Warehouse Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bwlvs) = CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) ).
+            lo_col_bwlvs->set_short_text( 'MvT' ).
+            lo_col_bwlvs->set_medium_text( 'Mov.Type' ).
+            lo_col_bwlvs->set_long_text( 'Movement Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bwlvs_txt) = CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS_TXT' ) ).
+            lo_col_bwlvs_txt->set_short_text( 'MvTDesc' ).
+            lo_col_bwlvs_txt->set_medium_text( 'Mov.Type Desc' ).
+            lo_col_bwlvs_txt->set_long_text( 'Movement Type Description' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_to_count) = CAST cl_salv_column_table( lo_columns->get_column( 'TO_COUNT' ) ).
+            lo_col_to_count->set_short_text( 'TOs' ).
+            lo_col_to_count->set_medium_text( 'Total TOs' ).
+            lo_col_to_count->set_long_text( 'Total Transfer Orders' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_confirmed) = CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) ).
+            lo_col_confirmed->set_short_text( 'Conf' ).
+            lo_col_confirmed->set_medium_text( 'Confirmed' ).
+            lo_col_confirmed->set_long_text( 'Confirmed TOs' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_open) = CAST cl_salv_column_table( lo_columns->get_column( 'TO_OPEN' ) ).
+            lo_col_open->set_short_text( 'Open' ).
+            lo_col_open->set_medium_text( 'Open TOs' ).
+            lo_col_open->set_long_text( 'Open Transfer Orders' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_avg) = CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) ).
+            lo_col_avg->set_short_text( 'AvgH' ).
+            lo_col_avg->set_medium_text( 'Avg Hours' ).
+            lo_col_avg->set_long_text( 'Average Processing Time (h)' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_min) = CAST cl_salv_column_table( lo_columns->get_column( 'MIN_TIME_HOURS' ) ).
+            lo_col_min->set_short_text( 'MinH' ).
+            lo_col_min->set_medium_text( 'Min Hours' ).
+            lo_col_min->set_long_text( 'Minimum Processing Time (h)' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_max) = CAST cl_salv_column_table( lo_columns->get_column( 'MAX_TIME_HOURS' ) ).
+            lo_col_max->set_short_text( 'MaxH' ).
+            lo_col_max->set_medium_text( 'Max Hours' ).
+            lo_col_max->set_long_text( 'Maximum Processing Time (h)' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_qty) = CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) ).
+            lo_col_qty->set_short_text( 'TotQty' ).
+            lo_col_qty->set_medium_text( 'Total Qty' ).
+            lo_col_qty->set_long_text( 'Total Quantity Moved' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_icon) = CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) ).
+            lo_col_icon->set_short_text( 'St' ).
+            lo_col_icon->set_medium_text( 'Status' ).
+            lo_col_icon->set_long_text( 'Performance Status' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         DATA(lo_functions) = mo_salv->get_functions( ).
         lo_functions->set_all( abap_true ).
 
         DATA(lo_display) = mo_salv->get_display_settings( ).
         lo_display->set_striped_pattern( abap_true ).
-        lo_display->set_list_header( 'Movement Type KPIs' ).
+        lo_display->set_list_header( 'Movement Type KPIs - Performance by Movement Type' ).
 
         mo_salv->display( ).
 
@@ -1537,12 +1944,84 @@ CLASS lcl_alv_handler IMPLEMENTATION.
         DATA(lo_columns) = mo_salv->get_columns( ).
         lo_columns->set_optimize( abap_true ).
 
+        " Set column headings
+        TRY.
+            DATA(lo_col_lgnum) = CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) ).
+            lo_col_lgnum->set_short_text( 'Whse' ).
+            lo_col_lgnum->set_medium_text( 'Warehouse' ).
+            lo_col_lgnum->set_long_text( 'Warehouse Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_date) = CAST cl_salv_column_table( lo_columns->get_column( 'DATE' ) ).
+            lo_col_date->set_short_text( 'Date' ).
+            lo_col_date->set_medium_text( 'Date' ).
+            lo_col_date->set_long_text( 'Date' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_day) = CAST cl_salv_column_table( lo_columns->get_column( 'DAY_NAME' ) ).
+            lo_col_day->set_short_text( 'Day' ).
+            lo_col_day->set_medium_text( 'Weekday' ).
+            lo_col_day->set_long_text( 'Day of Week' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_created) = CAST cl_salv_column_table( lo_columns->get_column( 'TO_CREATED' ) ).
+            lo_col_created->set_short_text( 'Crtd' ).
+            lo_col_created->set_medium_text( 'Created' ).
+            lo_col_created->set_long_text( 'TOs Created' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_conf) = CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) ).
+            lo_col_conf->set_short_text( 'Conf' ).
+            lo_col_conf->set_medium_text( 'Confirmed' ).
+            lo_col_conf->set_long_text( 'TOs Confirmed' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_avg) = CAST cl_salv_column_table( lo_columns->get_column( 'AVG_CONFIRM_HRS' ) ).
+            lo_col_avg->set_short_text( 'AvgH' ).
+            lo_col_avg->set_medium_text( 'Avg Hours' ).
+            lo_col_avg->set_long_text( 'Average Confirmation Time (h)' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_qty) = CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) ).
+            lo_col_qty->set_short_text( 'TotQty' ).
+            lo_col_qty->set_medium_text( 'Total Qty' ).
+            lo_col_qty->set_long_text( 'Total Quantity' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_peak) = CAST cl_salv_column_table( lo_columns->get_column( 'PEAK_HOUR' ) ).
+            lo_col_peak->set_short_text( 'Peak' ).
+            lo_col_peak->set_medium_text( 'Peak Hour' ).
+            lo_col_peak->set_long_text( 'Peak Activity Hour' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bar1) = CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CREATED' ) ).
+            lo_col_bar1->set_short_text( 'CrtdBar' ).
+            lo_col_bar1->set_medium_text( 'Created Graph' ).
+            lo_col_bar1->set_long_text( 'Created TOs Graph' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bar2) = CAST cl_salv_column_table( lo_columns->get_column( 'BAR_CONFIRMED' ) ).
+            lo_col_bar2->set_short_text( 'ConfBar' ).
+            lo_col_bar2->set_medium_text( 'Confirmed Graph' ).
+            lo_col_bar2->set_long_text( 'Confirmed TOs Graph' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         DATA(lo_functions) = mo_salv->get_functions( ).
         lo_functions->set_all( abap_true ).
 
         DATA(lo_display) = mo_salv->get_display_settings( ).
         lo_display->set_striped_pattern( abap_true ).
-        lo_display->set_list_header( 'Daily Statistics' ).
+        lo_display->set_list_header( 'Daily Statistics - TO Activity by Day' ).
 
         mo_salv->display( ).
 
@@ -1564,12 +2043,49 @@ CLASS lcl_alv_handler IMPLEMENTATION.
         DATA(lo_columns) = mo_salv->get_columns( ).
         lo_columns->set_optimize( abap_true ).
 
+        " Set column headings
+        TRY.
+            DATA(lo_col_lgnum) = CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) ).
+            lo_col_lgnum->set_short_text( 'Whse' ).
+            lo_col_lgnum->set_medium_text( 'Warehouse' ).
+            lo_col_lgnum->set_long_text( 'Warehouse Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bucket) = CAST cl_salv_column_table( lo_columns->get_column( 'AGE_BUCKET' ) ).
+            lo_col_bucket->set_short_text( 'Age' ).
+            lo_col_bucket->set_medium_text( 'Age Bucket' ).
+            lo_col_bucket->set_long_text( 'Aging Bucket' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_count) = CAST cl_salv_column_table( lo_columns->get_column( 'TO_COUNT' ) ).
+            lo_col_count->set_short_text( 'Count' ).
+            lo_col_count->set_medium_text( 'TO Count' ).
+            lo_col_count->set_long_text( 'Number of TOs' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_pct) = CAST cl_salv_column_table( lo_columns->get_column( 'PERCENTAGE' ) ).
+            lo_col_pct->set_short_text( 'Pct' ).
+            lo_col_pct->set_medium_text( 'Percentage' ).
+            lo_col_pct->set_long_text( 'Percentage of Total' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bar) = CAST cl_salv_column_table( lo_columns->get_column( 'BAR_GRAPH' ) ).
+            lo_col_bar->set_short_text( 'Graph' ).
+            lo_col_bar->set_medium_text( 'Distribution' ).
+            lo_col_bar->set_long_text( 'Distribution Graph' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         DATA(lo_functions) = mo_salv->get_functions( ).
         lo_functions->set_all( abap_true ).
 
         DATA(lo_display) = mo_salv->get_display_settings( ).
         lo_display->set_striped_pattern( abap_true ).
-        lo_display->set_list_header( 'Open TO Aging Analysis' ).
+        lo_display->set_list_header( 'Open TO Aging Analysis - Waiting Time Distribution' ).
 
         mo_salv->display( ).
 
@@ -1591,12 +2107,63 @@ CLASS lcl_alv_handler IMPLEMENTATION.
         DATA(lo_columns) = mo_salv->get_columns( ).
         lo_columns->set_optimize( abap_true ).
 
+        " Set column headings
+        TRY.
+            DATA(lo_col_lgnum) = CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) ).
+            lo_col_lgnum->set_short_text( 'Whse' ).
+            lo_col_lgnum->set_medium_text( 'Warehouse' ).
+            lo_col_lgnum->set_long_text( 'Warehouse Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_qname) = CAST cl_salv_column_table( lo_columns->get_column( 'QNAME' ) ).
+            lo_col_qname->set_short_text( 'User' ).
+            lo_col_qname->set_medium_text( 'User ID' ).
+            lo_col_qname->set_long_text( 'User Confirming TOs' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_name) = CAST cl_salv_column_table( lo_columns->get_column( 'USER_NAME' ) ).
+            lo_col_name->set_short_text( 'Name' ).
+            lo_col_name->set_medium_text( 'User Name' ).
+            lo_col_name->set_long_text( 'User Full Name' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_conf) = CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) ).
+            lo_col_conf->set_short_text( 'Conf' ).
+            lo_col_conf->set_medium_text( 'TOs Conf.' ).
+            lo_col_conf->set_long_text( 'TOs Confirmed' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_items) = CAST cl_salv_column_table( lo_columns->get_column( 'ITEMS_PROCESSED' ) ).
+            lo_col_items->set_short_text( 'Items' ).
+            lo_col_items->set_medium_text( 'Items Proc.' ).
+            lo_col_items->set_long_text( 'Items Processed (Qty)' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_avg) = CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) ).
+            lo_col_avg->set_short_text( 'AvgH' ).
+            lo_col_avg->set_medium_text( 'Avg Hours' ).
+            lo_col_avg->set_long_text( 'Average Processing Time (h)' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_eff) = CAST cl_salv_column_table( lo_columns->get_column( 'EFFICIENCY' ) ).
+            lo_col_eff->set_short_text( 'Eff%' ).
+            lo_col_eff->set_medium_text( 'Efficiency' ).
+            lo_col_eff->set_long_text( 'Efficiency Percentage' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         DATA(lo_functions) = mo_salv->get_functions( ).
         lo_functions->set_all( abap_true ).
 
         DATA(lo_display) = mo_salv->get_display_settings( ).
         lo_display->set_striped_pattern( abap_true ).
-        lo_display->set_list_header( 'User Workload Analysis' ).
+        lo_display->set_list_header( 'User Workload Analysis - Performance by User' ).
 
         mo_salv->display( ).
 
@@ -1618,12 +2185,77 @@ CLASS lcl_alv_handler IMPLEMENTATION.
         DATA(lo_columns) = mo_salv->get_columns( ).
         lo_columns->set_optimize( abap_true ).
 
+        " Set column headings
+        TRY.
+            DATA(lo_col_lgnum) = CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) ).
+            lo_col_lgnum->set_short_text( 'Whse' ).
+            lo_col_lgnum->set_medium_text( 'Warehouse' ).
+            lo_col_lgnum->set_long_text( 'Warehouse Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_matnr) = CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) ).
+            lo_col_matnr->set_short_text( 'Material' ).
+            lo_col_matnr->set_medium_text( 'Material No' ).
+            lo_col_matnr->set_long_text( 'Material Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_maktx) = CAST cl_salv_column_table( lo_columns->get_column( 'MAKTX' ) ).
+            lo_col_maktx->set_short_text( 'Desc' ).
+            lo_col_maktx->set_medium_text( 'Description' ).
+            lo_col_maktx->set_long_text( 'Material Description' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_moves) = CAST cl_salv_column_table( lo_columns->get_column( 'MOVEMENTS' ) ).
+            lo_col_moves->set_short_text( 'Moves' ).
+            lo_col_moves->set_medium_text( 'Movements' ).
+            lo_col_moves->set_long_text( 'Total Movements' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_qty) = CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) ).
+            lo_col_qty->set_short_text( 'TotQty' ).
+            lo_col_qty->set_medium_text( 'Total Qty' ).
+            lo_col_qty->set_long_text( 'Total Quantity' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_meins) = CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) ).
+            lo_col_meins->set_short_text( 'UoM' ).
+            lo_col_meins->set_medium_text( 'Unit' ).
+            lo_col_meins->set_long_text( 'Unit of Measure' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_in) = CAST cl_salv_column_table( lo_columns->get_column( 'INBOUND' ) ).
+            lo_col_in->set_short_text( 'In' ).
+            lo_col_in->set_medium_text( 'Inbound' ).
+            lo_col_in->set_long_text( 'Inbound Movements' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_out) = CAST cl_salv_column_table( lo_columns->get_column( 'OUTBOUND' ) ).
+            lo_col_out->set_short_text( 'Out' ).
+            lo_col_out->set_medium_text( 'Outbound' ).
+            lo_col_out->set_long_text( 'Outbound Movements' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_int) = CAST cl_salv_column_table( lo_columns->get_column( 'INTERNAL' ) ).
+            lo_col_int->set_short_text( 'Int' ).
+            lo_col_int->set_medium_text( 'Internal' ).
+            lo_col_int->set_long_text( 'Internal Movements' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         DATA(lo_functions) = mo_salv->get_functions( ).
         lo_functions->set_all( abap_true ).
 
         DATA(lo_display) = mo_salv->get_display_settings( ).
         lo_display->set_striped_pattern( abap_true ).
-        lo_display->set_list_header( 'Material Flow Analysis' ).
+        lo_display->set_list_header( 'Material Flow Analysis - Movement Activity by Material' ).
 
         mo_salv->display( ).
 
@@ -1650,18 +2282,118 @@ CLASS lcl_alv_handler IMPLEMENTATION.
           CATCH cx_salv_not_found.
         ENDTRY.
 
+        " Set column headings
+        TRY.
+            DATA(lo_col_lgnum) = CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) ).
+            lo_col_lgnum->set_short_text( 'Whse' ).
+            lo_col_lgnum->set_medium_text( 'Warehouse' ).
+            lo_col_lgnum->set_long_text( 'Warehouse Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_tanum) = CAST cl_salv_column_table( lo_columns->get_column( 'TANUM' ) ).
+            lo_col_tanum->set_short_text( 'TO#' ).
+            lo_col_tanum->set_medium_text( 'TO Number' ).
+            lo_col_tanum->set_long_text( 'Transfer Order Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_tapos) = CAST cl_salv_column_table( lo_columns->get_column( 'TAPOS' ) ).
+            lo_col_tapos->set_short_text( 'Item' ).
+            lo_col_tapos->set_medium_text( 'Item No' ).
+            lo_col_tapos->set_long_text( 'Item Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_matnr) = CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) ).
+            lo_col_matnr->set_short_text( 'Material' ).
+            lo_col_matnr->set_medium_text( 'Material No' ).
+            lo_col_matnr->set_long_text( 'Material Number' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_maktx) = CAST cl_salv_column_table( lo_columns->get_column( 'MAKTX' ) ).
+            lo_col_maktx->set_short_text( 'Desc' ).
+            lo_col_maktx->set_medium_text( 'Description' ).
+            lo_col_maktx->set_long_text( 'Material Description' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_vsolm) = CAST cl_salv_column_table( lo_columns->get_column( 'VSOLM' ) ).
+            lo_col_vsolm->set_short_text( 'Qty' ).
+            lo_col_vsolm->set_medium_text( 'Quantity' ).
+            lo_col_vsolm->set_long_text( 'Source Quantity' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_meins) = CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) ).
+            lo_col_meins->set_short_text( 'UoM' ).
+            lo_col_meins->set_medium_text( 'Unit' ).
+            lo_col_meins->set_long_text( 'Unit of Measure' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_vltyp) = CAST cl_salv_column_table( lo_columns->get_column( 'VLTYP' ) ).
+            lo_col_vltyp->set_short_text( 'SrcTy' ).
+            lo_col_vltyp->set_medium_text( 'Source Type' ).
+            lo_col_vltyp->set_long_text( 'Source Storage Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_vlpla) = CAST cl_salv_column_table( lo_columns->get_column( 'VLPLA' ) ).
+            lo_col_vlpla->set_short_text( 'SrcBin' ).
+            lo_col_vlpla->set_medium_text( 'Source Bin' ).
+            lo_col_vlpla->set_long_text( 'Source Storage Bin' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_nltyp) = CAST cl_salv_column_table( lo_columns->get_column( 'NLTYP' ) ).
+            lo_col_nltyp->set_short_text( 'DstTy' ).
+            lo_col_nltyp->set_medium_text( 'Dest. Type' ).
+            lo_col_nltyp->set_long_text( 'Destination Storage Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_nlpla) = CAST cl_salv_column_table( lo_columns->get_column( 'NLPLA' ) ).
+            lo_col_nlpla->set_short_text( 'DstBin' ).
+            lo_col_nlpla->set_medium_text( 'Dest. Bin' ).
+            lo_col_nlpla->set_long_text( 'Destination Storage Bin' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bdatu) = CAST cl_salv_column_table( lo_columns->get_column( 'BDATU' ) ).
+            lo_col_bdatu->set_short_text( 'Date' ).
+            lo_col_bdatu->set_medium_text( 'Created On' ).
+            lo_col_bdatu->set_long_text( 'Creation Date' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_bzeit) = CAST cl_salv_column_table( lo_columns->get_column( 'BZEIT' ) ).
+            lo_col_bzeit->set_short_text( 'Time' ).
+            lo_col_bzeit->set_medium_text( 'Created At' ).
+            lo_col_bzeit->set_long_text( 'Creation Time' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            DATA(lo_col_dir) = CAST cl_salv_column_table( lo_columns->get_column( 'DIRECTION' ) ).
+            lo_col_dir->set_short_text( 'Flow' ).
+            lo_col_dir->set_medium_text( 'Direction' ).
+            lo_col_dir->set_long_text( 'Movement Direction' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
         DATA(lo_functions) = mo_salv->get_functions( ).
         lo_functions->set_all( abap_true ).
 
         DATA(lo_display) = mo_salv->get_display_settings( ).
         lo_display->set_striped_pattern( abap_true ).
-        lo_display->set_list_header( 'Movement Simulation Timeline' ).
+        lo_display->set_list_header( 'Movement Simulation Timeline - Chronological Movement List' ).
 
         " Enable sorting
         DATA(lo_sorts) = mo_salv->get_sorts( ).
         TRY.
             lo_sorts->add_sort( columnname = 'BDATU' ).
-            lo_sorts->add_sort( columnname = 'BUPTS' ).
+            lo_sorts->add_sort( columnname = 'BZEIT' ).
           CATCH cx_salv_not_found cx_salv_existing cx_salv_data_error.
         ENDTRY.
 
