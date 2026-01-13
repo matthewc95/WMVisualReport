@@ -1256,6 +1256,14 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
 ENDCLASS.
 
 *----------------------------------------------------------------------*
+* Forward declaration for lcl_movement_simulator
+* Dichiarazione anticipata per lcl_movement_simulator
+* Required because lcl_controller_graph references it before definition
+* Necessario perché lcl_controller_graph lo referenzia prima della definizione
+*----------------------------------------------------------------------*
+CLASS lcl_movement_simulator DEFINITION DEFERRED.
+
+*----------------------------------------------------------------------*
 * CLASS lcl_controller_graph DEFINITION
 *----------------------------------------------------------------------*
 CLASS lcl_controller_graph DEFINITION FINAL.
