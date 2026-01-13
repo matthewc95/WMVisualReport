@@ -1256,12 +1256,697 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
 ENDCLASS.
 
 *----------------------------------------------------------------------*
-* Forward declaration for lcl_movement_simulator
-* Dichiarazione anticipata per lcl_movement_simulator
-* Required because lcl_controller_graph references it before definition
-* Necessario perché lcl_controller_graph lo referenzia prima della definizione
+* CLASS lcl_movement_simulator DEFINITION
+* Classe per simulazione movimento materiali
+* Class for material movement simulation
 *----------------------------------------------------------------------*
-CLASS lcl_movement_simulator DEFINITION DEFERRED.
+CLASS lcl_movement_simulator DEFINITION FINAL.
+  PUBLIC SECTION.
+    CLASS-DATA:
+      go_instance TYPE REF TO lcl_movement_simulator.
+
+    CLASS-METHODS:
+      get_instance
+        RETURNING VALUE(ro_instance) TYPE REF TO lcl_movement_simulator.
+
+    METHODS:
+      " Initialize simulation with transfer order data
+      " Inizializza simulazione con dati ordini di trasferimento
+      initialize_simulation
+        IMPORTING
+          it_orders TYPE gty_transfer_orders,
+
+      " Load and prepare movement data for timeline
+      " Carica e prepara dati movimento per timeline
+      prepare_timeline,
+
+      " Generate simulation HTML dashboard
+      " Genera dashboard HTML per simulazione
+      generate_simulation_html
+        RETURNING VALUE(rv_html) TYPE string,
+
+      " Step forward in simulation
+      " Avanza nella simulazione
+      step_forward,
+
+      " Step backward in simulation
+      " Torna indietro nella simulazione
+      step_backward,
+
+      " Play/pause simulation
+      " Play/pausa simulazione
+      toggle_play,
+
+      " Reset to beginning
+      " Reset all'inizio
+      reset_simulation,
+
+      " Set simulation speed (1=normal, 2=2x, etc)
+      " Imposta velocità simulazione
+      set_speed
+        IMPORTING iv_speed TYPE i,
+
+      " Get current simulation state for display
+      " Ottieni stato corrente simulazione per visualizzazione
+      get_current_hour
+        RETURNING VALUE(rv_hour) TYPE i,
+
+      " Is simulation playing
+      " La simulazione è in esecuzione
+      is_playing
+        RETURNING VALUE(rv_playing) TYPE abap_bool.
+
+  PRIVATE SECTION.
+    DATA:
+      mt_movements      TYPE gty_sim_movements,
+      mt_storage_types  TYPE gty_sim_storage_types,
+      mt_active_moves   TYPE gty_sim_active_moves,
+      mv_current_hour   TYPE i VALUE 0,
+      mv_total_hours    TYPE i,
+      mv_min_date       TYPE sydatum,
+      mv_max_date       TYPE sydatum,
+      mv_playing        TYPE abap_bool,
+      mv_speed          TYPE i VALUE 1.
+
+    METHODS:
+      " Build storage type positions for visualization
+      " Costruisci posizioni tipi storage per visualizzazione
+      build_storage_layout,
+
+      " Get movements for specific hour
+      " Ottieni movimenti per ora specifica
+      get_movements_for_hour
+        IMPORTING iv_hour          TYPE i
+        RETURNING VALUE(rt_moves) TYPE gty_sim_movements,
+
+      " Generate CSS for simulation
+      " Genera CSS per simulazione
+      get_simulation_css
+        RETURNING VALUE(rv_css) TYPE string,
+
+      " Generate SVG for warehouse layout
+      " Genera SVG per layout magazzino
+      generate_warehouse_svg
+        RETURNING VALUE(rv_svg) TYPE string,
+
+      " Generate movement arrows
+      " Genera frecce movimento
+      generate_movement_arrows
+        RETURNING VALUE(rv_html) TYPE string,
+
+      " Generate timeline control
+      " Genera controllo timeline
+      generate_timeline_control
+        RETURNING VALUE(rv_html) TYPE string,
+
+      " Calculate storage type stats at current hour
+      " Calcola statistiche tipi storage all'ora corrente
+      calculate_current_stats.
+
+ENDCLASS.
+
+*----------------------------------------------------------------------*
+* CLASS lcl_movement_simulator IMPLEMENTATION
+*----------------------------------------------------------------------*
+CLASS lcl_movement_simulator IMPLEMENTATION.
+
+  METHOD get_instance.
+    IF go_instance IS INITIAL.
+      go_instance = NEW #( ).
+    ENDIF.
+    ro_instance = go_instance.
+  ENDMETHOD.
+
+  METHOD initialize_simulation.
+    DATA: ls_movement TYPE gty_sim_movement,
+          lv_ts_create TYPE timestamp,
+          lv_ts_confirm TYPE timestamp.
+
+    CLEAR: mt_movements, mt_storage_types, mt_active_moves.
+    mv_current_hour = 0.
+    mv_playing = abap_false.
+
+    " Convert transfer orders to simulation movements
+    " Converti ordini di trasferimento in movimenti simulazione
+    LOOP AT it_orders INTO DATA(ls_order).
+      CLEAR ls_movement.
+
+      ls_movement-tanum         = ls_order-tanum.
+      ls_movement-tapos         = ls_order-tapos.
+      ls_movement-matnr         = ls_order-matnr.
+      ls_movement-maktx         = ls_order-maktx.
+      ls_movement-quantity      = ls_order-vsolm.
+      ls_movement-meins         = ls_order-meins.
+      ls_movement-from_lgtyp    = ls_order-vltyp.
+      ls_movement-from_lgpla    = ls_order-vlpla.
+      ls_movement-to_lgtyp      = ls_order-nltyp.
+      ls_movement-to_lgpla      = ls_order-nlpla.
+      ls_movement-movement_type = ls_order-bwlvs.
+      ls_movement-is_confirmed  = ls_order-confirmed.
+
+      " Use creation or confirmation date/time
+      " Usa data/ora creazione o conferma
+      IF ls_order-confirmed = abap_true AND ls_order-qdatu IS NOT INITIAL.
+        ls_movement-event_date   = ls_order-qdatu.
+        ls_movement-event_hour   = ls_order-qzeit+0(2).
+        ls_movement-event_minute = ls_order-qzeit+2(2).
+      ELSE.
+        ls_movement-event_date   = ls_order-bdatu.
+        ls_movement-event_hour   = ls_order-bzeit+0(2).
+        ls_movement-event_minute = ls_order-bzeit+2(2).
+      ENDIF.
+
+      " Convert to timestamp
+      " Converti in timestamp
+      CONVERT DATE ls_movement-event_date TIME ls_order-bzeit
+        INTO TIME STAMP ls_movement-event_time TIME ZONE sy-zonlo.
+
+      APPEND ls_movement TO mt_movements.
+    ENDLOOP.
+
+    " Sort by event time
+    " Ordina per ora evento
+    SORT mt_movements BY event_date event_hour event_minute.
+
+    " Build storage layout
+    " Costruisci layout storage
+    build_storage_layout( ).
+
+    " Prepare timeline
+    " Prepara timeline
+    prepare_timeline( ).
+  ENDMETHOD.
+
+  METHOD build_storage_layout.
+    DATA: ls_sttype TYPE gty_sim_storage_type,
+          lt_types  TYPE SORTED TABLE OF lagp-lgtyp WITH UNIQUE KEY table_line,
+          lv_x      TYPE i,
+          lv_y      TYPE i,
+          lv_col    TYPE i VALUE 0.
+
+    " Get unique storage types from movements
+    " Ottieni tipi storage univoci dai movimenti
+    LOOP AT mt_movements INTO DATA(ls_move).
+      IF ls_move-from_lgtyp IS NOT INITIAL.
+        INSERT ls_move-from_lgtyp INTO TABLE lt_types.
+      ENDIF.
+      IF ls_move-to_lgtyp IS NOT INITIAL.
+        INSERT ls_move-to_lgtyp INTO TABLE lt_types.
+      ENDIF.
+    ENDLOOP.
+
+    " Create layout grid (4 columns)
+    " Crea griglia layout (4 colonne)
+    CLEAR mt_storage_types.
+    lv_col = 0.
+    LOOP AT lt_types INTO DATA(lv_lgtyp).
+      CLEAR ls_sttype.
+      ls_sttype-lgtyp = lv_lgtyp.
+
+      " Get description from T301T if available
+      " Ottieni descrizione da T301T se disponibile
+      SELECT SINGLE ltypt FROM t301t
+        INTO ls_sttype-lgtyp_txt
+        WHERE lgtyp = lv_lgtyp
+          AND spras = sy-langu.
+
+      IF sy-subrc <> 0.
+        ls_sttype-lgtyp_txt = lv_lgtyp.
+      ENDIF.
+
+      " Position in grid (4 columns, variable rows)
+      " Posizione in griglia (4 colonne, righe variabili)
+      ls_sttype-x_pos = ( lv_col MOD 4 ) * 200 + 50.
+      ls_sttype-y_pos = ( lv_col DIV 4 ) * 120 + 50.
+
+      " Count bins from movements
+      " Conta ubicazioni dai movimenti
+      LOOP AT mt_movements INTO DATA(ls_m)
+        WHERE from_lgtyp = lv_lgtyp OR to_lgtyp = lv_lgtyp.
+        ls_sttype-total_bins = ls_sttype-total_bins + 1.
+      ENDLOOP.
+
+      APPEND ls_sttype TO mt_storage_types.
+      lv_col = lv_col + 1.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD prepare_timeline.
+    " Determine date range
+    " Determina intervallo date
+    IF mt_movements IS NOT INITIAL.
+      READ TABLE mt_movements INTO DATA(ls_first) INDEX 1.
+      mv_min_date = ls_first-event_date.
+
+      DATA(lv_last_idx) = lines( mt_movements ).
+      READ TABLE mt_movements INTO DATA(ls_last) INDEX lv_last_idx.
+      mv_max_date = ls_last-event_date.
+
+      " Calculate total hours in range
+      " Calcola ore totali nell'intervallo
+      mv_total_hours = ( mv_max_date - mv_min_date + 1 ) * 24.
+      IF mv_total_hours < 1.
+        mv_total_hours = 24.
+      ENDIF.
+    ELSE.
+      mv_min_date = sy-datum.
+      mv_max_date = sy-datum.
+      mv_total_hours = 24.
+    ENDIF.
+
+    " Initialize stats
+    " Inizializza statistiche
+    calculate_current_stats( ).
+  ENDMETHOD.
+
+  METHOD get_movements_for_hour.
+    DATA: lv_target_date TYPE sydatum,
+          lv_target_hour TYPE i.
+
+    " Calculate target date/hour from absolute hour index
+    " Calcola data/ora target dall'indice ora assoluto
+    lv_target_date = mv_min_date + ( iv_hour DIV 24 ).
+    lv_target_hour = iv_hour MOD 24.
+
+    LOOP AT mt_movements INTO DATA(ls_move)
+      WHERE event_date = lv_target_date
+        AND event_hour = lv_target_hour.
+      APPEND ls_move TO rt_moves.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD calculate_current_stats.
+    DATA: lv_target_date TYPE sydatum,
+          lv_target_hour TYPE i.
+
+    " Reset counters
+    " Resetta contatori
+    LOOP AT mt_storage_types ASSIGNING FIELD-SYMBOL(<fs_st>).
+      <fs_st>-incoming = 0.
+      <fs_st>-outgoing = 0.
+      <fs_st>-current_stock = 0.
+    ENDLOOP.
+
+    " Calculate date/hour
+    " Calcola data/ora
+    lv_target_date = mv_min_date + ( mv_current_hour DIV 24 ).
+    lv_target_hour = mv_current_hour MOD 24.
+
+    " Count movements up to current hour
+    " Conta movimenti fino all'ora corrente
+    LOOP AT mt_movements INTO DATA(ls_move)
+      WHERE event_date < lv_target_date
+         OR ( event_date = lv_target_date AND event_hour <= lv_target_hour ).
+
+      " Outgoing from source
+      " In uscita dalla sorgente
+      IF ls_move-from_lgtyp IS NOT INITIAL.
+        READ TABLE mt_storage_types ASSIGNING FIELD-SYMBOL(<fs_from>)
+          WITH KEY lgtyp = ls_move-from_lgtyp.
+        IF sy-subrc = 0.
+          <fs_from>-outgoing = <fs_from>-outgoing + 1.
+        ENDIF.
+      ENDIF.
+
+      " Incoming to destination
+      " In entrata alla destinazione
+      IF ls_move-to_lgtyp IS NOT INITIAL.
+        READ TABLE mt_storage_types ASSIGNING FIELD-SYMBOL(<fs_to>)
+          WITH KEY lgtyp = ls_move-to_lgtyp.
+        IF sy-subrc = 0.
+          <fs_to>-incoming = <fs_to>-incoming + 1.
+        ENDIF.
+      ENDIF.
+    ENDLOOP.
+
+    " Calculate current stock (incoming - outgoing for each type)
+    " Calcola stock corrente (entrate - uscite per ogni tipo)
+    LOOP AT mt_storage_types ASSIGNING <fs_st>.
+      <fs_st>-current_stock = <fs_st>-incoming - <fs_st>-outgoing.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD step_forward.
+    IF mv_current_hour < mv_total_hours - 1.
+      mv_current_hour = mv_current_hour + mv_speed.
+      IF mv_current_hour > mv_total_hours - 1.
+        mv_current_hour = mv_total_hours - 1.
+      ENDIF.
+      calculate_current_stats( ).
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD step_backward.
+    IF mv_current_hour > 0.
+      mv_current_hour = mv_current_hour - mv_speed.
+      IF mv_current_hour < 0.
+        mv_current_hour = 0.
+      ENDIF.
+      calculate_current_stats( ).
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD toggle_play.
+    mv_playing = COND #( WHEN mv_playing = abap_true THEN abap_false ELSE abap_true ).
+  ENDMETHOD.
+
+  METHOD reset_simulation.
+    mv_current_hour = 0.
+    mv_playing = abap_false.
+    calculate_current_stats( ).
+  ENDMETHOD.
+
+  METHOD set_speed.
+    mv_speed = iv_speed.
+    IF mv_speed < 1.
+      mv_speed = 1.
+    ELSEIF mv_speed > 10.
+      mv_speed = 10.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD get_current_hour.
+    rv_hour = mv_current_hour.
+  ENDMETHOD.
+
+  METHOD is_playing.
+    rv_playing = mv_playing.
+  ENDMETHOD.
+
+  METHOD generate_simulation_html.
+    DATA: lv_target_date TYPE sydatum,
+          lv_target_hour TYPE i,
+          lv_time_str    TYPE string,
+          lv_progress    TYPE p LENGTH 5 DECIMALS 1.
+
+    " Calculate current time
+    " Calcola ora corrente
+    lv_target_date = mv_min_date + ( mv_current_hour DIV 24 ).
+    lv_target_hour = mv_current_hour MOD 24.
+    lv_time_str = |{ lv_target_date DATE = USER } { lv_target_hour }:00|.
+
+    " Calculate progress percentage
+    " Calcola percentuale progresso
+    IF mv_total_hours > 0.
+      lv_progress = ( mv_current_hour / mv_total_hours ) * 100.
+    ENDIF.
+
+    " Build HTML
+    " Costruisci HTML
+    rv_html =
+      |<!DOCTYPE html>| &&
+      |<html lang="en">| &&
+      |<head>| &&
+      |<meta charset="UTF-8">| &&
+      |<style>{ get_simulation_css( ) }</style>| &&
+      |</head>| &&
+      |<body>| &&
+      |<div class="simulation-container">| &&
+
+      " Header / Intestazione
+      |<div class="sim-header">| &&
+      |<h1>Movement Simulation / Simulazione Movimenti</h1>| &&
+      |<div class="time-display">{ lv_time_str }</div>| &&
+      |</div>| &&
+
+      " Warehouse visualization / Visualizzazione magazzino
+      |<div class="warehouse-area">| &&
+      generate_warehouse_svg( ) &&
+      |</div>| &&
+
+      " Timeline control / Controllo timeline
+      generate_timeline_control( ) &&
+
+      " Statistics panel / Pannello statistiche
+      |<div class="stats-panel">| &&
+      |<div class="stat-title">Storage Type Activity / Attività Tipi Storage</div>| &&
+      |<div class="stat-grid">|.
+
+    " Add stats for each storage type
+    " Aggiungi statistiche per ogni tipo storage
+    LOOP AT mt_storage_types INTO DATA(ls_st).
+      DATA(lv_color) = COND string(
+        WHEN ls_st-current_stock < 0 THEN '#e74c3c'
+        WHEN ls_st-current_stock > 10 THEN '#27ae60'
+        ELSE '#f39c12' ).
+
+      rv_html = rv_html &&
+        |<div class="stat-card">| &&
+        |<div class="stat-type">{ ls_st-lgtyp }</div>| &&
+        |<div class="stat-name">{ ls_st-lgtyp_txt }</div>| &&
+        |<div class="stat-numbers">| &&
+        |<span class="in" title="Incoming / Entrate">↓{ ls_st-incoming }</span>| &&
+        |<span class="out" title="Outgoing / Uscite">↑{ ls_st-outgoing }</span>| &&
+        |<span class="net" style="color:{ lv_color }">={ ls_st-current_stock }</span>| &&
+        |</div>| &&
+        |</div>|.
+    ENDLOOP.
+
+    rv_html = rv_html &&
+      |</div>| &&
+      |</div>| &&
+
+      |</div>| &&
+      |</body>| &&
+      |</html>|.
+  ENDMETHOD.
+
+  METHOD get_simulation_css.
+    rv_css =
+      |* \{ margin: 0; padding: 0; box-sizing: border-box; \}| &&
+      |body \{| &&
+      |  font-family: 'Segoe UI', sans-serif;| &&
+      |  background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);| &&
+      |  color: #fff;| &&
+      |  padding: 10px;| &&
+      |  min-height: 100vh;| &&
+      |\}| &&
+      |.simulation-container \{| &&
+      |  max-width: 100%;| &&
+      |\}| &&
+      |.sim-header \{| &&
+      |  display: flex;| &&
+      |  justify-content: space-between;| &&
+      |  align-items: center;| &&
+      |  padding: 15px 20px;| &&
+      |  background: rgba(102, 126, 234, 0.2);| &&
+      |  border-radius: 12px;| &&
+      |  margin-bottom: 15px;| &&
+      |\}| &&
+      |.sim-header h1 \{| &&
+      |  font-size: 18px;| &&
+      |  font-weight: 600;| &&
+      |  color: #667eea;| &&
+      |\}| &&
+      |.time-display \{| &&
+      |  font-size: 16px;| &&
+      |  font-weight: 500;| &&
+      |  color: #a0aec0;| &&
+      |  background: rgba(0,0,0,0.3);| &&
+      |  padding: 8px 15px;| &&
+      |  border-radius: 8px;| &&
+      |\}| &&
+      |.warehouse-area \{| &&
+      |  background: rgba(255,255,255,0.03);| &&
+      |  border-radius: 12px;| &&
+      |  padding: 15px;| &&
+      |  margin-bottom: 15px;| &&
+      |  min-height: 200px;| &&
+      |  position: relative;| &&
+      |\}| &&
+      |.warehouse-svg \{| &&
+      |  width: 100%;| &&
+      |  height: 180px;| &&
+      |\}| &&
+      |.st-box \{| &&
+      |  fill: rgba(102, 126, 234, 0.3);| &&
+      |  stroke: #667eea;| &&
+      |  stroke-width: 2;| &&
+      |  rx: 8;| &&
+      |\}| &&
+      |.st-box:hover \{| &&
+      |  fill: rgba(102, 126, 234, 0.5);| &&
+      |\}| &&
+      |.st-label \{| &&
+      |  fill: #fff;| &&
+      |  font-size: 12px;| &&
+      |  font-weight: 600;| &&
+      |  text-anchor: middle;| &&
+      |\}| &&
+      |.st-count \{| &&
+      |  fill: #a0aec0;| &&
+      |  font-size: 10px;| &&
+      |  text-anchor: middle;| &&
+      |\}| &&
+      |.movement-arrow \{| &&
+      |  stroke: #27ae60;| &&
+      |  stroke-width: 2;| &&
+      |  fill: none;| &&
+      |  marker-end: url(#arrowhead);| &&
+      |  animation: pulse 1s ease-in-out infinite;| &&
+      |\}| &&
+      |@keyframes pulse \{| &&
+      |  0%, 100% \{ opacity: 0.5; \}| &&
+      |  50% \{ opacity: 1; \}| &&
+      |\}| &&
+      |.timeline-control \{| &&
+      |  background: rgba(255,255,255,0.05);| &&
+      |  border-radius: 12px;| &&
+      |  padding: 15px;| &&
+      |  margin-bottom: 15px;| &&
+      |\}| &&
+      |.timeline-bar \{| &&
+      |  width: 100%;| &&
+      |  height: 8px;| &&
+      |  background: rgba(255,255,255,0.1);| &&
+      |  border-radius: 4px;| &&
+      |  margin-bottom: 10px;| &&
+      |  position: relative;| &&
+      |\}| &&
+      |.timeline-progress \{| &&
+      |  height: 100%;| &&
+      |  background: linear-gradient(90deg, #667eea, #764ba2);| &&
+      |  border-radius: 4px;| &&
+      |  transition: width 0.3s ease;| &&
+      |\}| &&
+      |.timeline-info \{| &&
+      |  display: flex;| &&
+      |  justify-content: space-between;| &&
+      |  font-size: 11px;| &&
+      |  color: #a0aec0;| &&
+      |\}| &&
+      |.stats-panel \{| &&
+      |  background: rgba(255,255,255,0.05);| &&
+      |  border-radius: 12px;| &&
+      |  padding: 15px;| &&
+      |\}| &&
+      |.stat-title \{| &&
+      |  font-size: 12px;| &&
+      |  color: #a0aec0;| &&
+      |  text-transform: uppercase;| &&
+      |  letter-spacing: 1px;| &&
+      |  margin-bottom: 10px;| &&
+      |\}| &&
+      |.stat-grid \{| &&
+      |  display: grid;| &&
+      |  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));| &&
+      |  gap: 10px;| &&
+      |\}| &&
+      |.stat-card \{| &&
+      |  background: rgba(0,0,0,0.2);| &&
+      |  padding: 10px;| &&
+      |  border-radius: 8px;| &&
+      |  border-left: 3px solid #667eea;| &&
+      |\}| &&
+      |.stat-type \{| &&
+      |  font-size: 14px;| &&
+      |  font-weight: 600;| &&
+      |  color: #667eea;| &&
+      |\}| &&
+      |.stat-name \{| &&
+      |  font-size: 10px;| &&
+      |  color: #718096;| &&
+      |  margin-bottom: 6px;| &&
+      |\}| &&
+      |.stat-numbers \{| &&
+      |  display: flex;| &&
+      |  gap: 10px;| &&
+      |  font-size: 12px;| &&
+      |\}| &&
+      |.stat-numbers .in \{ color: #27ae60; \}| &&
+      |.stat-numbers .out \{ color: #e74c3c; \}| &&
+      |.stat-numbers .net \{ font-weight: 600; \}|.
+  ENDMETHOD.
+
+  METHOD generate_warehouse_svg.
+    DATA: lv_width  TYPE i VALUE 800,
+          lv_height TYPE i VALUE 180.
+
+    rv_svg =
+      |<svg class="warehouse-svg" viewBox="0 0 { lv_width } { lv_height }">| &&
+      |<defs>| &&
+      |<marker id="arrowhead" markerWidth="10" markerHeight="7" | &&
+      |refX="9" refY="3.5" orient="auto">| &&
+      |<polygon points="0 0, 10 3.5, 0 7" fill="#27ae60"/>| &&
+      |</marker>| &&
+      |</defs>|.
+
+    " Draw storage type boxes
+    " Disegna box tipi storage
+    LOOP AT mt_storage_types INTO DATA(ls_st).
+      DATA(lv_stock_color) = COND string(
+        WHEN ls_st-current_stock < 0 THEN '#e74c3c'
+        WHEN ls_st-current_stock > 5 THEN '#27ae60'
+        ELSE '#667eea' ).
+
+      rv_svg = rv_svg &&
+        |<rect class="st-box" x="{ ls_st-x_pos }" y="{ ls_st-y_pos }" | &&
+        |width="160" height="80" style="stroke:{ lv_stock_color }"/>| &&
+        |<text class="st-label" x="{ ls_st-x_pos + 80 }" y="{ ls_st-y_pos + 35 }">| &&
+        |{ ls_st-lgtyp }</text>| &&
+        |<text class="st-count" x="{ ls_st-x_pos + 80 }" y="{ ls_st-y_pos + 55 }">| &&
+        |Stock: { ls_st-current_stock }</text>|.
+    ENDLOOP.
+
+    " Draw movement arrows for current hour
+    " Disegna frecce movimento per ora corrente
+    DATA(lt_current_moves) = get_movements_for_hour( mv_current_hour ).
+    LOOP AT lt_current_moves INTO DATA(ls_move).
+      " Find source and target positions
+      " Trova posizioni sorgente e destinazione
+      READ TABLE mt_storage_types INTO DATA(ls_from)
+        WITH KEY lgtyp = ls_move-from_lgtyp.
+      READ TABLE mt_storage_types INTO DATA(ls_to)
+        WITH KEY lgtyp = ls_move-to_lgtyp.
+
+      IF ls_from IS NOT INITIAL AND ls_to IS NOT INITIAL.
+        DATA(lv_x1) = ls_from-x_pos + 160.
+        DATA(lv_y1) = ls_from-y_pos + 40.
+        DATA(lv_x2) = ls_to-x_pos.
+        DATA(lv_y2) = ls_to-y_pos + 40.
+
+        rv_svg = rv_svg &&
+          |<line class="movement-arrow" | &&
+          |x1="{ lv_x1 }" y1="{ lv_y1 }" | &&
+          |x2="{ lv_x2 }" y2="{ lv_y2 }"/>|.
+      ENDIF.
+    ENDLOOP.
+
+    rv_svg = rv_svg && |</svg>|.
+  ENDMETHOD.
+
+  METHOD generate_movement_arrows.
+    " Arrows are now part of SVG
+    " Le frecce sono ora parte dell'SVG
+    rv_html = ''.
+  ENDMETHOD.
+
+  METHOD generate_timeline_control.
+    DATA: lv_progress TYPE p LENGTH 5 DECIMALS 1,
+          lv_start_str TYPE string,
+          lv_end_str   TYPE string.
+
+    IF mv_total_hours > 0.
+      lv_progress = ( mv_current_hour / mv_total_hours ) * 100.
+    ENDIF.
+
+    lv_start_str = |{ mv_min_date DATE = USER }|.
+    lv_end_str = |{ mv_max_date DATE = USER }|.
+
+    rv_html =
+      |<div class="timeline-control">| &&
+      |<div class="timeline-bar">| &&
+      |<div class="timeline-progress" style="width: { lv_progress }%"></div>| &&
+      |</div>| &&
+      |<div class="timeline-info">| &&
+      |<span>{ lv_start_str }</span>| &&
+      |<span>Hour / Ora { mv_current_hour + 1 } of / di { mv_total_hours }</span>| &&
+      |<span>{ lv_end_str }</span>| &&
+      |</div>| &&
+      |</div>|.
+  ENDMETHOD.
+
+ENDCLASS.
 
 *----------------------------------------------------------------------*
 * CLASS lcl_controller_graph DEFINITION
@@ -1489,651 +2174,6 @@ CLASS lcl_controller_graph IMPLEMENTATION.
     IF mo_simulator IS BOUND.
       mo_simulator->reset_simulation( ).
     ENDIF.
-  ENDMETHOD.
-
-ENDCLASS.
-
-*----------------------------------------------------------------------*
-* CLASS lcl_movement_simulator DEFINITION
-*----------------------------------------------------------------------*
-CLASS lcl_movement_simulator DEFINITION FINAL.
-  PUBLIC SECTION.
-    CLASS-DATA:
-      go_instance TYPE REF TO lcl_movement_simulator.
-
-    CLASS-METHODS:
-      get_instance
-        RETURNING VALUE(ro_instance) TYPE REF TO lcl_movement_simulator.
-
-    METHODS:
-      " Initialize simulation with transfer order data
-      initialize_simulation
-        IMPORTING
-          it_orders TYPE gty_transfer_orders,
-
-      " Load and prepare movement data for timeline
-      prepare_timeline,
-
-      " Generate simulation HTML dashboard
-      generate_simulation_html
-        RETURNING VALUE(rv_html) TYPE string,
-
-      " Step forward in simulation
-      step_forward,
-
-      " Step backward in simulation
-      step_backward,
-
-      " Play/pause simulation
-      toggle_play,
-
-      " Reset to beginning
-      reset_simulation,
-
-      " Set simulation speed (1=normal, 2=2x, etc)
-      set_speed
-        IMPORTING iv_speed TYPE i,
-
-      " Get current simulation state for display
-      get_current_hour
-        RETURNING VALUE(rv_hour) TYPE i,
-
-      " Is simulation playing
-      is_playing
-        RETURNING VALUE(rv_playing) TYPE abap_bool.
-
-  PRIVATE SECTION.
-    DATA:
-      mt_movements      TYPE gty_sim_movements,
-      mt_storage_types  TYPE gty_sim_storage_types,
-      mt_active_moves   TYPE gty_sim_active_moves,
-      mv_current_hour   TYPE i VALUE 0,
-      mv_total_hours    TYPE i,
-      mv_min_date       TYPE sydatum,
-      mv_max_date       TYPE sydatum,
-      mv_playing        TYPE abap_bool,
-      mv_speed          TYPE i VALUE 1.
-
-    METHODS:
-      " Build storage type positions for visualization
-      build_storage_layout,
-
-      " Get movements for specific hour
-      get_movements_for_hour
-        IMPORTING iv_hour          TYPE i
-        RETURNING VALUE(rt_moves) TYPE gty_sim_movements,
-
-      " Generate CSS for simulation
-      get_simulation_css
-        RETURNING VALUE(rv_css) TYPE string,
-
-      " Generate SVG for warehouse layout
-      generate_warehouse_svg
-        RETURNING VALUE(rv_svg) TYPE string,
-
-      " Generate movement arrows
-      generate_movement_arrows
-        RETURNING VALUE(rv_html) TYPE string,
-
-      " Generate timeline control
-      generate_timeline_control
-        RETURNING VALUE(rv_html) TYPE string,
-
-      " Calculate storage type stats at current hour
-      calculate_current_stats.
-
-ENDCLASS.
-
-*----------------------------------------------------------------------*
-* CLASS lcl_movement_simulator IMPLEMENTATION
-*----------------------------------------------------------------------*
-CLASS lcl_movement_simulator IMPLEMENTATION.
-
-  METHOD get_instance.
-    IF go_instance IS INITIAL.
-      go_instance = NEW #( ).
-    ENDIF.
-    ro_instance = go_instance.
-  ENDMETHOD.
-
-  METHOD initialize_simulation.
-    DATA: ls_movement TYPE gty_sim_movement,
-          lv_ts_create TYPE timestamp,
-          lv_ts_confirm TYPE timestamp.
-
-    CLEAR: mt_movements, mt_storage_types, mt_active_moves.
-    mv_current_hour = 0.
-    mv_playing = abap_false.
-
-    " Convert transfer orders to simulation movements
-    LOOP AT it_orders INTO DATA(ls_order).
-      CLEAR ls_movement.
-
-      ls_movement-tanum         = ls_order-tanum.
-      ls_movement-tapos         = ls_order-tapos.
-      ls_movement-matnr         = ls_order-matnr.
-      ls_movement-maktx         = ls_order-maktx.
-      ls_movement-quantity      = ls_order-vsolm.
-      ls_movement-meins         = ls_order-meins.
-      ls_movement-from_lgtyp    = ls_order-vltyp.
-      ls_movement-from_lgpla    = ls_order-vlpla.
-      ls_movement-to_lgtyp      = ls_order-nltyp.
-      ls_movement-to_lgpla      = ls_order-nlpla.
-      ls_movement-movement_type = ls_order-bwlvs.
-      ls_movement-is_confirmed  = ls_order-confirmed.
-
-      " Use creation or confirmation date/time
-      IF ls_order-confirmed = abap_true AND ls_order-qdatu IS NOT INITIAL.
-        ls_movement-event_date   = ls_order-qdatu.
-        ls_movement-event_hour   = ls_order-qzeit+0(2).
-        ls_movement-event_minute = ls_order-qzeit+2(2).
-      ELSE.
-        ls_movement-event_date   = ls_order-bdatu.
-        ls_movement-event_hour   = ls_order-bzeit+0(2).
-        ls_movement-event_minute = ls_order-bzeit+2(2).
-      ENDIF.
-
-      " Convert to timestamp
-      CONVERT DATE ls_movement-event_date TIME ls_order-bzeit
-        INTO TIME STAMP ls_movement-event_time TIME ZONE sy-zonlo.
-
-      APPEND ls_movement TO mt_movements.
-    ENDLOOP.
-
-    " Sort by event time
-    SORT mt_movements BY event_date event_hour event_minute.
-
-    " Build storage layout
-    build_storage_layout( ).
-
-    " Prepare timeline
-    prepare_timeline( ).
-  ENDMETHOD.
-
-  METHOD build_storage_layout.
-    DATA: ls_sttype TYPE gty_sim_storage_type,
-          lt_types  TYPE SORTED TABLE OF lagp-lgtyp WITH UNIQUE KEY table_line,
-          lv_x      TYPE i,
-          lv_y      TYPE i,
-          lv_col    TYPE i VALUE 0.
-
-    " Get unique storage types from movements
-    LOOP AT mt_movements INTO DATA(ls_move).
-      IF ls_move-from_lgtyp IS NOT INITIAL.
-        INSERT ls_move-from_lgtyp INTO TABLE lt_types.
-      ENDIF.
-      IF ls_move-to_lgtyp IS NOT INITIAL.
-        INSERT ls_move-to_lgtyp INTO TABLE lt_types.
-      ENDIF.
-    ENDLOOP.
-
-    " Create layout grid (4 columns)
-    CLEAR mt_storage_types.
-    lv_col = 0.
-    LOOP AT lt_types INTO DATA(lv_lgtyp).
-      CLEAR ls_sttype.
-      ls_sttype-lgtyp = lv_lgtyp.
-
-      " Get description from T301T if available
-      SELECT SINGLE ltypt FROM t301t
-        INTO ls_sttype-lgtyp_txt
-        WHERE lgtyp = lv_lgtyp
-          AND spras = sy-langu.
-
-      IF sy-subrc <> 0.
-        ls_sttype-lgtyp_txt = lv_lgtyp.
-      ENDIF.
-
-      " Position in grid (4 columns, variable rows)
-      ls_sttype-x_pos = ( lv_col MOD 4 ) * 200 + 50.
-      ls_sttype-y_pos = ( lv_col DIV 4 ) * 120 + 50.
-
-      " Count bins from movements
-      LOOP AT mt_movements INTO DATA(ls_m)
-        WHERE from_lgtyp = lv_lgtyp OR to_lgtyp = lv_lgtyp.
-        ls_sttype-total_bins = ls_sttype-total_bins + 1.
-      ENDLOOP.
-
-      APPEND ls_sttype TO mt_storage_types.
-      lv_col = lv_col + 1.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD prepare_timeline.
-    " Determine date range
-    IF mt_movements IS NOT INITIAL.
-      READ TABLE mt_movements INTO DATA(ls_first) INDEX 1.
-      mv_min_date = ls_first-event_date.
-
-      DATA(lv_last_idx) = lines( mt_movements ).
-      READ TABLE mt_movements INTO DATA(ls_last) INDEX lv_last_idx.
-      mv_max_date = ls_last-event_date.
-
-      " Calculate total hours in range
-      mv_total_hours = ( mv_max_date - mv_min_date + 1 ) * 24.
-      IF mv_total_hours < 1.
-        mv_total_hours = 24.
-      ENDIF.
-    ELSE.
-      mv_min_date = sy-datum.
-      mv_max_date = sy-datum.
-      mv_total_hours = 24.
-    ENDIF.
-
-    " Initialize stats
-    calculate_current_stats( ).
-  ENDMETHOD.
-
-  METHOD get_movements_for_hour.
-    DATA: lv_target_date TYPE sydatum,
-          lv_target_hour TYPE i.
-
-    " Calculate target date/hour from absolute hour index
-    lv_target_date = mv_min_date + ( iv_hour DIV 24 ).
-    lv_target_hour = iv_hour MOD 24.
-
-    LOOP AT mt_movements INTO DATA(ls_move)
-      WHERE event_date = lv_target_date
-        AND event_hour = lv_target_hour.
-      APPEND ls_move TO rt_moves.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD calculate_current_stats.
-    DATA: lv_target_date TYPE sydatum,
-          lv_target_hour TYPE i.
-
-    " Reset counters
-    LOOP AT mt_storage_types ASSIGNING FIELD-SYMBOL(<fs_st>).
-      <fs_st>-incoming = 0.
-      <fs_st>-outgoing = 0.
-      <fs_st>-current_stock = 0.
-    ENDLOOP.
-
-    " Calculate date/hour
-    lv_target_date = mv_min_date + ( mv_current_hour DIV 24 ).
-    lv_target_hour = mv_current_hour MOD 24.
-
-    " Count movements up to current hour
-    LOOP AT mt_movements INTO DATA(ls_move)
-      WHERE event_date < lv_target_date
-         OR ( event_date = lv_target_date AND event_hour <= lv_target_hour ).
-
-      " Outgoing from source
-      IF ls_move-from_lgtyp IS NOT INITIAL.
-        READ TABLE mt_storage_types ASSIGNING FIELD-SYMBOL(<fs_from>)
-          WITH KEY lgtyp = ls_move-from_lgtyp.
-        IF sy-subrc = 0.
-          <fs_from>-outgoing = <fs_from>-outgoing + 1.
-        ENDIF.
-      ENDIF.
-
-      " Incoming to destination
-      IF ls_move-to_lgtyp IS NOT INITIAL.
-        READ TABLE mt_storage_types ASSIGNING FIELD-SYMBOL(<fs_to>)
-          WITH KEY lgtyp = ls_move-to_lgtyp.
-        IF sy-subrc = 0.
-          <fs_to>-incoming = <fs_to>-incoming + 1.
-        ENDIF.
-      ENDIF.
-    ENDLOOP.
-
-    " Calculate current stock (incoming - outgoing for each type)
-    LOOP AT mt_storage_types ASSIGNING <fs_st>.
-      <fs_st>-current_stock = <fs_st>-incoming - <fs_st>-outgoing.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD step_forward.
-    IF mv_current_hour < mv_total_hours - 1.
-      mv_current_hour = mv_current_hour + mv_speed.
-      IF mv_current_hour > mv_total_hours - 1.
-        mv_current_hour = mv_total_hours - 1.
-      ENDIF.
-      calculate_current_stats( ).
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD step_backward.
-    IF mv_current_hour > 0.
-      mv_current_hour = mv_current_hour - mv_speed.
-      IF mv_current_hour < 0.
-        mv_current_hour = 0.
-      ENDIF.
-      calculate_current_stats( ).
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD toggle_play.
-    mv_playing = COND #( WHEN mv_playing = abap_true THEN abap_false ELSE abap_true ).
-  ENDMETHOD.
-
-  METHOD reset_simulation.
-    mv_current_hour = 0.
-    mv_playing = abap_false.
-    calculate_current_stats( ).
-  ENDMETHOD.
-
-  METHOD set_speed.
-    mv_speed = iv_speed.
-    IF mv_speed < 1.
-      mv_speed = 1.
-    ELSEIF mv_speed > 10.
-      mv_speed = 10.
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD get_current_hour.
-    rv_hour = mv_current_hour.
-  ENDMETHOD.
-
-  METHOD is_playing.
-    rv_playing = mv_playing.
-  ENDMETHOD.
-
-  METHOD generate_simulation_html.
-    DATA: lv_target_date TYPE sydatum,
-          lv_target_hour TYPE i,
-          lv_time_str    TYPE string,
-          lv_progress    TYPE p LENGTH 5 DECIMALS 1.
-
-    " Calculate current time
-    lv_target_date = mv_min_date + ( mv_current_hour DIV 24 ).
-    lv_target_hour = mv_current_hour MOD 24.
-    lv_time_str = |{ lv_target_date DATE = USER } { lv_target_hour }:00|.
-
-    " Calculate progress percentage
-    IF mv_total_hours > 0.
-      lv_progress = ( mv_current_hour / mv_total_hours ) * 100.
-    ENDIF.
-
-    " Build HTML
-    rv_html =
-      |<!DOCTYPE html>| &&
-      |<html lang="en">| &&
-      |<head>| &&
-      |<meta charset="UTF-8">| &&
-      |<style>{ get_simulation_css( ) }</style>| &&
-      |</head>| &&
-      |<body>| &&
-      |<div class="simulation-container">| &&
-
-      " Header
-      |<div class="sim-header">| &&
-      |<h1>Movement Simulation</h1>| &&
-      |<div class="time-display">{ lv_time_str }</div>| &&
-      |</div>| &&
-
-      " Warehouse visualization
-      |<div class="warehouse-area">| &&
-      generate_warehouse_svg( ) &&
-      |</div>| &&
-
-      " Timeline control
-      generate_timeline_control( ) &&
-
-      " Statistics panel
-      |<div class="stats-panel">| &&
-      |<div class="stat-title">Storage Type Activity</div>| &&
-      |<div class="stat-grid">|.
-
-    " Add stats for each storage type
-    LOOP AT mt_storage_types INTO DATA(ls_st).
-      DATA(lv_color) = COND string(
-        WHEN ls_st-current_stock < 0 THEN '#e74c3c'
-        WHEN ls_st-current_stock > 10 THEN '#27ae60'
-        ELSE '#f39c12' ).
-
-      rv_html = rv_html &&
-        |<div class="stat-card">| &&
-        |<div class="stat-type">{ ls_st-lgtyp }</div>| &&
-        |<div class="stat-name">{ ls_st-lgtyp_txt }</div>| &&
-        |<div class="stat-numbers">| &&
-        |<span class="in" title="Incoming">↓{ ls_st-incoming }</span>| &&
-        |<span class="out" title="Outgoing">↑{ ls_st-outgoing }</span>| &&
-        |<span class="net" style="color:{ lv_color }">={ ls_st-current_stock }</span>| &&
-        |</div>| &&
-        |</div>|.
-    ENDLOOP.
-
-    rv_html = rv_html &&
-      |</div>| &&
-      |</div>| &&
-
-      |</div>| &&
-      |</body>| &&
-      |</html>|.
-  ENDMETHOD.
-
-  METHOD get_simulation_css.
-    rv_css =
-      |* \{ margin: 0; padding: 0; box-sizing: border-box; \}| &&
-      |body \{| &&
-      |  font-family: 'Segoe UI', sans-serif;| &&
-      |  background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);| &&
-      |  color: #fff;| &&
-      |  padding: 10px;| &&
-      |  min-height: 100vh;| &&
-      |\}| &&
-      |.simulation-container \{| &&
-      |  max-width: 100%;| &&
-      |\}| &&
-      |.sim-header \{| &&
-      |  display: flex;| &&
-      |  justify-content: space-between;| &&
-      |  align-items: center;| &&
-      |  padding: 15px 20px;| &&
-      |  background: rgba(102, 126, 234, 0.2);| &&
-      |  border-radius: 12px;| &&
-      |  margin-bottom: 15px;| &&
-      |\}| &&
-      |.sim-header h1 \{| &&
-      |  font-size: 18px;| &&
-      |  font-weight: 600;| &&
-      |  color: #667eea;| &&
-      |\}| &&
-      |.time-display \{| &&
-      |  font-size: 16px;| &&
-      |  font-weight: 500;| &&
-      |  color: #a0aec0;| &&
-      |  background: rgba(0,0,0,0.3);| &&
-      |  padding: 8px 15px;| &&
-      |  border-radius: 8px;| &&
-      |\}| &&
-      |.warehouse-area \{| &&
-      |  background: rgba(255,255,255,0.03);| &&
-      |  border-radius: 12px;| &&
-      |  padding: 15px;| &&
-      |  margin-bottom: 15px;| &&
-      |  min-height: 200px;| &&
-      |  position: relative;| &&
-      |\}| &&
-      |.warehouse-svg \{| &&
-      |  width: 100%;| &&
-      |  height: 180px;| &&
-      |\}| &&
-      |.st-box \{| &&
-      |  fill: rgba(102, 126, 234, 0.3);| &&
-      |  stroke: #667eea;| &&
-      |  stroke-width: 2;| &&
-      |  rx: 8;| &&
-      |\}| &&
-      |.st-box:hover \{| &&
-      |  fill: rgba(102, 126, 234, 0.5);| &&
-      |\}| &&
-      |.st-label \{| &&
-      |  fill: #fff;| &&
-      |  font-size: 12px;| &&
-      |  font-weight: 600;| &&
-      |  text-anchor: middle;| &&
-      |\}| &&
-      |.st-count \{| &&
-      |  fill: #a0aec0;| &&
-      |  font-size: 10px;| &&
-      |  text-anchor: middle;| &&
-      |\}| &&
-      |.movement-arrow \{| &&
-      |  stroke: #27ae60;| &&
-      |  stroke-width: 2;| &&
-      |  fill: none;| &&
-      |  marker-end: url(#arrowhead);| &&
-      |  animation: pulse 1s ease-in-out infinite;| &&
-      |\}| &&
-      |@keyframes pulse \{| &&
-      |  0%, 100% \{ opacity: 0.5; \}| &&
-      |  50% \{ opacity: 1; \}| &&
-      |\}| &&
-      |.timeline-control \{| &&
-      |  background: rgba(255,255,255,0.05);| &&
-      |  border-radius: 12px;| &&
-      |  padding: 15px;| &&
-      |  margin-bottom: 15px;| &&
-      |\}| &&
-      |.timeline-bar \{| &&
-      |  width: 100%;| &&
-      |  height: 8px;| &&
-      |  background: rgba(255,255,255,0.1);| &&
-      |  border-radius: 4px;| &&
-      |  margin-bottom: 10px;| &&
-      |  position: relative;| &&
-      |\}| &&
-      |.timeline-progress \{| &&
-      |  height: 100%;| &&
-      |  background: linear-gradient(90deg, #667eea, #764ba2);| &&
-      |  border-radius: 4px;| &&
-      |  transition: width 0.3s ease;| &&
-      |\}| &&
-      |.timeline-info \{| &&
-      |  display: flex;| &&
-      |  justify-content: space-between;| &&
-      |  font-size: 11px;| &&
-      |  color: #a0aec0;| &&
-      |\}| &&
-      |.stats-panel \{| &&
-      |  background: rgba(255,255,255,0.05);| &&
-      |  border-radius: 12px;| &&
-      |  padding: 15px;| &&
-      |\}| &&
-      |.stat-title \{| &&
-      |  font-size: 12px;| &&
-      |  color: #a0aec0;| &&
-      |  text-transform: uppercase;| &&
-      |  letter-spacing: 1px;| &&
-      |  margin-bottom: 10px;| &&
-      |\}| &&
-      |.stat-grid \{| &&
-      |  display: grid;| &&
-      |  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));| &&
-      |  gap: 10px;| &&
-      |\}| &&
-      |.stat-card \{| &&
-      |  background: rgba(0,0,0,0.2);| &&
-      |  padding: 10px;| &&
-      |  border-radius: 8px;| &&
-      |  border-left: 3px solid #667eea;| &&
-      |\}| &&
-      |.stat-type \{| &&
-      |  font-size: 14px;| &&
-      |  font-weight: 600;| &&
-      |  color: #667eea;| &&
-      |\}| &&
-      |.stat-name \{| &&
-      |  font-size: 10px;| &&
-      |  color: #718096;| &&
-      |  margin-bottom: 6px;| &&
-      |\}| &&
-      |.stat-numbers \{| &&
-      |  display: flex;| &&
-      |  gap: 10px;| &&
-      |  font-size: 12px;| &&
-      |\}| &&
-      |.stat-numbers .in \{ color: #27ae60; \}| &&
-      |.stat-numbers .out \{ color: #e74c3c; \}| &&
-      |.stat-numbers .net \{ font-weight: 600; \}|.
-  ENDMETHOD.
-
-  METHOD generate_warehouse_svg.
-    DATA: lv_width  TYPE i VALUE 800,
-          lv_height TYPE i VALUE 180.
-
-    rv_svg =
-      |<svg class="warehouse-svg" viewBox="0 0 { lv_width } { lv_height }">| &&
-      |<defs>| &&
-      |<marker id="arrowhead" markerWidth="10" markerHeight="7" | &&
-      |refX="9" refY="3.5" orient="auto">| &&
-      |<polygon points="0 0, 10 3.5, 0 7" fill="#27ae60"/>| &&
-      |</marker>| &&
-      |</defs>|.
-
-    " Draw storage type boxes
-    LOOP AT mt_storage_types INTO DATA(ls_st).
-      DATA(lv_stock_color) = COND string(
-        WHEN ls_st-current_stock < 0 THEN '#e74c3c'
-        WHEN ls_st-current_stock > 5 THEN '#27ae60'
-        ELSE '#667eea' ).
-
-      rv_svg = rv_svg &&
-        |<rect class="st-box" x="{ ls_st-x_pos }" y="{ ls_st-y_pos }" | &&
-        |width="160" height="80" style="stroke:{ lv_stock_color }"/>| &&
-        |<text class="st-label" x="{ ls_st-x_pos + 80 }" y="{ ls_st-y_pos + 35 }">| &&
-        |{ ls_st-lgtyp }</text>| &&
-        |<text class="st-count" x="{ ls_st-x_pos + 80 }" y="{ ls_st-y_pos + 55 }">| &&
-        |Stock: { ls_st-current_stock }</text>|.
-    ENDLOOP.
-
-    " Draw movement arrows for current hour
-    DATA(lt_current_moves) = get_movements_for_hour( mv_current_hour ).
-    LOOP AT lt_current_moves INTO DATA(ls_move).
-      " Find source and target positions
-      READ TABLE mt_storage_types INTO DATA(ls_from)
-        WITH KEY lgtyp = ls_move-from_lgtyp.
-      READ TABLE mt_storage_types INTO DATA(ls_to)
-        WITH KEY lgtyp = ls_move-to_lgtyp.
-
-      IF ls_from IS NOT INITIAL AND ls_to IS NOT INITIAL.
-        DATA(lv_x1) = ls_from-x_pos + 160.
-        DATA(lv_y1) = ls_from-y_pos + 40.
-        DATA(lv_x2) = ls_to-x_pos.
-        DATA(lv_y2) = ls_to-y_pos + 40.
-
-        rv_svg = rv_svg &&
-          |<line class="movement-arrow" | &&
-          |x1="{ lv_x1 }" y1="{ lv_y1 }" | &&
-          |x2="{ lv_x2 }" y2="{ lv_y2 }"/>|.
-      ENDIF.
-    ENDLOOP.
-
-    rv_svg = rv_svg && |</svg>|.
-  ENDMETHOD.
-
-  METHOD generate_movement_arrows.
-    " Arrows are now part of SVG
-    rv_html = ''.
-  ENDMETHOD.
-
-  METHOD generate_timeline_control.
-    DATA: lv_progress TYPE p LENGTH 5 DECIMALS 1,
-          lv_start_str TYPE string,
-          lv_end_str   TYPE string.
-
-    IF mv_total_hours > 0.
-      lv_progress = ( mv_current_hour / mv_total_hours ) * 100.
-    ENDIF.
-
-    lv_start_str = |{ mv_min_date DATE = USER }|.
-    lv_end_str = |{ mv_max_date DATE = USER }|.
-
-    rv_html =
-      |<div class="timeline-control">| &&
-      |<div class="timeline-bar">| &&
-      |<div class="timeline-progress" style="width: { lv_progress }%"></div>| &&
-      |</div>| &&
-      |<div class="timeline-info">| &&
-      |<span>{ lv_start_str }</span>| &&
-      |<span>Hour { mv_current_hour + 1 } of { mv_total_hours }</span>| &&
-      |<span>{ lv_end_str }</span>| &&
-      |</div>| &&
-      |</div>|.
   ENDMETHOD.
 
 ENDCLASS.
