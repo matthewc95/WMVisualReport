@@ -45,6 +45,7 @@
        <CONT_TYPE>SCREEN</CONT_TYPE>
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>OKCODE</TYPE>
+       <NAME>SY-UCOMM</NAME>
        <TEXT>____________________</TEXT>
        <LENGTH>020</LENGTH>
        <VISLENGTH>020</VISLENGTH>
@@ -136,8 +137,8 @@
       <CODE>SIM_BACK</CODE>
       <TEXTNO>001</TEXTNO>
       <TEXT_TYPE>S</TEXT_TYPE>
-      <TEXT_NAME>ICON_PREVIOUS_OBJECT</TEXT_NAME>
-      <ICON_ID>@0E@</ICON_ID>
+      <TEXT_NAME>ICON_COLUMN_LEFT</TEXT_NAME>
+      <ICON_ID>@0D@</ICON_ID>
       <FUN_TEXT>Sim Backward</FUN_TEXT>
       <ICON_TEXT>Sim Back</ICON_TEXT>
      </RSMPE_FUNT>
@@ -145,8 +146,8 @@
       <CODE>SIM_FWD</CODE>
       <TEXTNO>001</TEXTNO>
       <TEXT_TYPE>S</TEXT_TYPE>
-      <TEXT_NAME>ICON_NEXT_OBJECT</TEXT_NAME>
-      <ICON_ID>@0F@</ICON_ID>
+      <TEXT_NAME>ICON_COLUMN_RIGHT</TEXT_NAME>
+      <ICON_ID>@0E@</ICON_ID>
       <FUN_TEXT>Sim Forward</FUN_TEXT>
       <ICON_TEXT>Sim Fwd</ICON_TEXT>
      </RSMPE_FUNT>
@@ -227,79 +228,79 @@
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>02</NO>
+      <NO>01</NO>
       <PFNO>03</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>03</NO>
+      <NO>02</NO>
       <PFNO>12</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>04</NO>
+      <NO>03</NO>
       <PFNO>05</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>05</NO>
+      <NO>04</NO>
       <PFNO>02</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>06</NO>
+      <NO>05</NO>
       <PFNO>06</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>07</NO>
+      <NO>06</NO>
       <PFNO>07</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>08</NO>
+      <NO>07</NO>
       <PFNO>08</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>09</NO>
+      <NO>08</NO>
       <PFNO>09</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
+      <NO>09</NO>
+      <PFNO>20</PFNO>
+     </RSMPE_BUT>
+     <RSMPE_BUT>
+      <PFK_CODE>000001</PFK_CODE>
+      <CODE>0001</CODE>
       <NO>10</NO>
-      <PFNO>10</PFNO>
+      <PFNO>13</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
       <NO>11</NO>
-      <PFNO>11</PFNO>
-     </RSMPE_BUT>
-     <RSMPE_BUT>
-      <PFK_CODE>000001</PFK_CODE>
-      <CODE>0001</CODE>
-      <NO>13</NO>
       <PFNO>14</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>14</NO>
-      <PFNO>15</PFNO>
+      <NO>12</NO>
+      <PFNO>17</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
-      <NO>15</NO>
+      <NO>13</NO>
       <PFNO>16</PFNO>
      </RSMPE_BUT>
     </BUT>
@@ -348,20 +349,14 @@
      </RSMPE_PFK>
      <RSMPE_PFK>
       <CODE>000001</CODE>
-      <PFNO>10</PFNO>
-      <FUNCODE>VIEW_USERS</FUNCODE>
-      <FUNNO>001</FUNNO>
-     </RSMPE_PFK>
-     <RSMPE_PFK>
-      <CODE>000001</CODE>
-      <PFNO>11</PFNO>
-      <FUNCODE>VIEW_SIM</FUNCODE>
-      <FUNNO>001</FUNNO>
-     </RSMPE_PFK>
-     <RSMPE_PFK>
-      <CODE>000001</CODE>
       <PFNO>12</PFNO>
       <FUNCODE>CANC</FUNCODE>
+      <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
+      <PFNO>13</PFNO>
+      <FUNCODE>VIEW_SIM</FUNCODE>
       <FUNNO>001</FUNNO>
      </RSMPE_PFK>
      <RSMPE_PFK>
@@ -372,14 +367,26 @@
      </RSMPE_PFK>
      <RSMPE_PFK>
       <CODE>000001</CODE>
-      <PFNO>15</PFNO>
+      <PFNO>16</PFNO>
+      <FUNCODE>SIM_RESET</FUNCODE>
+      <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
+      <PFNO>17</PFNO>
       <FUNCODE>SIM_FWD</FUNCODE>
       <FUNNO>001</FUNNO>
      </RSMPE_PFK>
      <RSMPE_PFK>
       <CODE>000001</CODE>
-      <PFNO>16</PFNO>
+      <PFNO>19</PFNO>
       <FUNCODE>SIM_RESET</FUNCODE>
+      <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
+      <PFNO>20</PFNO>
+      <FUNCODE>VIEW_USERS</FUNCODE>
       <FUNNO>001</FUNNO>
      </RSMPE_PFK>
     </PFK>
