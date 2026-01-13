@@ -79,6 +79,13 @@ MODULE user_command_0100 INPUT.
       " Pulisci oggetti GUI prima di uscire dalla schermata
       " This is important to avoid memory leaks and orphaned controls
       " Questo è importante per evitare memory leak e controlli orfani
+      IF lo_ctrl_pai->mo_alv_handler->mo_salv IS BOUND.
+        FREE lo_ctrl_pai->mo_alv_handler->mo_salv.
+      ENDIF.
+      IF go_alv_splitter IS BOUND.
+        go_alv_splitter->free( ).
+        FREE go_alv_splitter.
+      ENDIF.
       IF go_html_dashboard IS BOUND.
         go_html_dashboard->free( ).
         FREE go_html_dashboard.
