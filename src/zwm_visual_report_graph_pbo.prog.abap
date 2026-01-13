@@ -132,11 +132,6 @@ MODULE init_screen OUTPUT.
           OTHERS = 1.
     ENDIF.
 
-    " Step 4: Set ALV container reference in handler
-    " Passo 4: Imposta riferimento container ALV nell'handler
-    lo_controller = lcl_controller_graph=>get_instance( ).
-    lo_controller->mo_alv_handler->set_container( go_cont_alv ).
-
     gv_graph_initialized = abap_true.
   ENDIF.
 
@@ -216,19 +211,49 @@ MODULE display_alv OUTPUT.
   IF gv_last_view_pbo <> lo_ctrl->get_current_view( ) OR
      lo_ctrl->mo_alv_handler->mo_salv IS NOT BOUND.
 
-    " IMPORTANT: Close and destroy previous SALV properly
-    " IMPORTANTE: Chiudi e distruggi SALV precedente correttamente
-    " Simply using FREE doesn't remove the control from the container
-    " Usare solo FREE non rimuove il controllo dal container
+    " IMPORTANT: Destroy sub-splitter completely to allow new ALV
+    " IMPORTANTE: Distruggi completamente sub-splitter per nuovo ALV
+    " CL_SALV_TABLE cannot be reused in the same container, so we must
+    " destroy the container itself and create a new one
+    " CL_SALV_TABLE non può essere riutilizzato nello stesso container,
+    " quindi dobbiamo distruggere il container stesso e crearne uno nuovo
     IF lo_ctrl->mo_alv_handler->mo_salv IS BOUND.
-      lo_ctrl->mo_alv_handler->mo_salv->close_screen( ).
       FREE lo_ctrl->mo_alv_handler->mo_salv.
       CLEAR lo_ctrl->mo_alv_handler->mo_salv.
     ENDIF.
 
-    " Flush the GUI to ensure cleanup completes
-    " Flush GUI per assicurare completamento pulizia
+    IF go_alv_splitter IS BOUND.
+      go_alv_splitter->free( ).
+      FREE go_alv_splitter.
+      CLEAR go_alv_splitter.
+      CLEAR go_alv_subcontainer.
+    ENDIF.
+
+    " Flush to complete destruction
+    " Flush per completare distruzione
     cl_gui_cfw=>flush( ).
+
+    " Create new sub-splitter inside ALV container (1 row x 1 col)
+    " Crea nuovo sub-splitter dentro container ALV (1 riga x 1 col)
+    IF go_cont_alv IS BOUND.
+      CREATE OBJECT go_alv_splitter
+        EXPORTING
+          parent  = go_cont_alv
+          rows    = 1
+          columns = 1
+        EXCEPTIONS
+          OTHERS  = 1.
+
+      IF go_alv_splitter IS BOUND.
+        go_alv_subcontainer = go_alv_splitter->get_container(
+          row    = 1
+          column = 1 ).
+
+        " Set the fresh container in the ALV handler
+        " Imposta il nuovo container nell'handler ALV
+        lo_ctrl->mo_alv_handler->set_container( go_alv_subcontainer ).
+      ENDIF.
+    ENDIF.
 
     " Display current view data in ALV
     " Visualizza dati vista corrente in ALV

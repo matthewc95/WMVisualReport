@@ -228,7 +228,11 @@ DATA:
   go_cont_dashboard   TYPE REF TO cl_gui_container,  " Dashboard container / Container dashboard
   go_cont_alv         TYPE REF TO cl_gui_container,  " ALV container / Container ALV
   go_html_dashboard   TYPE REF TO cl_gui_html_viewer, " HTML viewer / Visualizzatore HTML
-  go_alv_graph        TYPE REF TO cl_salv_table.     " ALV table / Tabella ALV
+  go_alv_graph        TYPE REF TO cl_salv_table,     " ALV table / Tabella ALV
+  " Sub-splitter for ALV - can be destroyed and recreated when view changes
+  " Sub-splitter per ALV - può essere distrutto e ricreato al cambio vista
+  go_alv_splitter     TYPE REF TO cl_gui_splitter_container,
+  go_alv_subcontainer TYPE REF TO cl_gui_container.
 
 *----------------------------------------------------------------------*
 * Global Variables - Screen Control
