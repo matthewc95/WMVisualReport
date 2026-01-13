@@ -1973,8 +1973,8 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
 
   METHOD generate_timeline_control.
     DATA: lv_progress     TYPE p LENGTH 5 DECIMALS 1,
-          lv_start_str    TYPE string,
-          lv_end_str      TYPE string,
+          lv_start_str    TYPE c LENGTH 10,
+          lv_end_str      TYPE c LENGTH 10,
           lv_step_label   TYPE string,
           lv_curr_date    TYPE sydatum,
           lv_curr_date_c  TYPE c LENGTH 10.
