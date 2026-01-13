@@ -733,67 +733,29 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
 
         DATA(lo_columns) = mo_salv->get_columns( ).
 
-        " Set color column and hide technical columns
-        TRY.
-            lo_columns->set_color_column( 'CELLCOLOR' ).
-            lo_columns->get_column( 'CELLCOLOR' )->set_visible( abap_false ).
-            lo_columns->get_column( 'STATUS' )->set_visible( abap_false ).
-            lo_columns->get_column( 'STATUS_ICON' )->set_visible( abap_false ).
-          CATCH cx_salv_not_found cx_salv_data_error.
-        ENDTRY.
+        " Hide technical columns - separate TRY for each
+        " Nascondi colonne tecniche - TRY separati
+        TRY. lo_columns->set_color_column( 'CELLCOLOR' ). CATCH cx_salv_not_found cx_salv_data_error. ENDTRY.
+        TRY. lo_columns->get_column( 'CELLCOLOR' )->set_visible( abap_false ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. lo_columns->get_column( 'STATUS' )->set_visible( abap_false ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. lo_columns->get_column( 'STATUS_ICON' )->set_visible( abap_false ). CATCH cx_salv_not_found. ENDTRY.
 
-        " Column headings - Storage Bins
-        TRY.
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_medium_text( 'Warehouse' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_long_text( 'Warehouse Number' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_short_text( 'Type' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_medium_text( 'Stor.Type' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_long_text( 'Storage Type' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) )->set_short_text( 'Bin' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) )->set_medium_text( 'Stor.Bin' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) )->set_long_text( 'Storage Bin' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGBER' ) )->set_short_text( 'Area' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGBER' ) )->set_medium_text( 'Stor.Area' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGBER' ) )->set_long_text( 'Storage Section' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LPTYP' ) )->set_short_text( 'BinTy' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LPTYP' ) )->set_medium_text( 'Bin Type' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LPTYP' ) )->set_long_text( 'Storage Bin Type' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAXLE' ) )->set_short_text( 'MaxSU' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAXLE' ) )->set_medium_text( 'Max SU' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAXLE' ) )->set_long_text( 'Max Storage Units' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'ANZLE' ) )->set_short_text( 'CurSU' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'ANZLE' ) )->set_medium_text( 'Curr SU' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'ANZLE' ) )->set_long_text( 'Current Storage Units' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'VERME' ) )->set_short_text( 'AvlQty' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'VERME' ) )->set_medium_text( 'Avail Qty' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'VERME' ) )->set_long_text( 'Available Quantity' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'GESME' ) )->set_short_text( 'TotQty' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'GESME' ) )->set_medium_text( 'Total Qty' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'GESME' ) )->set_long_text( 'Total Quantity' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_short_text( 'UoM' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_medium_text( 'Unit' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_long_text( 'Unit of Measure' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) )->set_short_text( 'Occ%' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) )->set_medium_text( 'Occupancy%' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) )->set_long_text( 'Occupancy Percentage' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'Stat' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_medium_text( 'Status' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_long_text( 'Bin Status' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_short_text( 'Matnr' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_medium_text( 'Material' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_long_text( 'Material Number' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) )->set_short_text( '#Mat' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) )->set_medium_text( 'Mat Count' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) )->set_long_text( 'Number of Materials' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) )->set_short_text( '#Qnt' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) )->set_medium_text( 'Quant Cnt' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) )->set_long_text( 'Number of Quants' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED' ) )->set_short_text( 'Blk' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED' ) )->set_medium_text( 'Blocked' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED' ) )->set_long_text( 'Bin Blocked' ).
-          CATCH cx_salv_not_found.
-        ENDTRY.
+        " Column headings - Storage Bins / Intestazioni - Ubicazioni
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_long_text( 'Warehouse Number' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'LGTYP' ) )->set_long_text( 'Storage Type' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'LGPLA' ) )->set_long_text( 'Storage Bin' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'LGBER' ) )->set_long_text( 'Storage Section' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'LPTYP' ) )->set_long_text( 'Bin Type' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'MAXLE' ) )->set_long_text( 'Max Storage Units' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'ANZLE' ) )->set_long_text( 'Current Storage Units' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'VERME' ) )->set_long_text( 'Available Quantity' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'GESME' ) )->set_long_text( 'Total Quantity' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'MEINS' ) )->set_long_text( 'Unit of Measure' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'OCCUPANCY' ) )->set_long_text( 'Occupancy %' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'MATNR' ) )->set_long_text( 'Material Number' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'MAT_COUNT' ) )->set_long_text( 'Number of Materials' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'QUANT_COUNT' ) )->set_long_text( 'Number of Quants' ). CATCH cx_salv_not_found. ENDTRY.
+        TRY. CAST cl_salv_column_table( lo_columns->get_column( 'BLOCKED' ) )->set_long_text( 'Bin Blocked' ). CATCH cx_salv_not_found. ENDTRY.
 
         " Add totals
         DATA(lo_aggregations) = mo_salv->get_aggregations( ).
@@ -972,50 +934,64 @@ CLASS lcl_alv_handler_graph IMPLEMENTATION.
 
         DATA(lo_columns) = mo_salv->get_columns( ).
 
-        " Hide technical columns
+        " Hide technical columns - separate TRY blocks for independence
+        " Nascondi colonne tecniche - TRY separati per indipendenza
         TRY.
             lo_columns->set_color_column( 'CELLCOLOR' ).
-            lo_columns->get_column( 'CELLCOLOR' )->set_visible( abap_false ).
-            lo_columns->get_column( 'STATUS' )->set_visible( abap_false ).
-            lo_columns->get_column( 'STATUS_ICON' )->set_visible( abap_false ).
           CATCH cx_salv_not_found cx_salv_data_error.
         ENDTRY.
-
-        " Column headings - Movement KPIs
         TRY.
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_short_text( 'Whse' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_medium_text( 'Warehouse' ).
+            lo_columns->get_column( 'CELLCOLOR' )->set_visible( abap_false ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            lo_columns->get_column( 'STATUS' )->set_visible( abap_false ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
+            lo_columns->get_column( 'STATUS_ICON' )->set_visible( abap_false ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+
+        " Column headings - Movement KPIs / Intestazioni colonne - KPI Movimenti
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'LGNUM' ) )->set_long_text( 'Warehouse Number' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_short_text( 'MvT' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_medium_text( 'Mov.Type' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS' ) )->set_long_text( 'Movement Type' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS_TXT' ) )->set_short_text( 'Descr' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS_TXT' ) )->set_medium_text( 'Description' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'BWLVS_TXT' ) )->set_long_text( 'Movement Type Description' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TO_COUNT' ) )->set_short_text( 'Total' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TO_COUNT' ) )->set_medium_text( 'Total TOs' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'TO_COUNT' ) )->set_long_text( 'Total Transfer Orders' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_short_text( 'Conf' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_medium_text( 'Confirmed' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'TO_CONFIRMED' ) )->set_long_text( 'Confirmed TOs' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TO_OPEN' ) )->set_short_text( 'Open' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TO_OPEN' ) )->set_medium_text( 'Open TOs' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'TO_OPEN' ) )->set_long_text( 'Open Transfer Orders' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_short_text( 'AvgH' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_medium_text( 'Avg Hours' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'AVG_TIME_HOURS' ) )->set_long_text( 'Avg Confirmation Time (h)' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MIN_TIME_HOURS' ) )->set_short_text( 'MinH' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MIN_TIME_HOURS' ) )->set_medium_text( 'Min Hours' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'MIN_TIME_HOURS' ) )->set_long_text( 'Min Confirmation Time (h)' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAX_TIME_HOURS' ) )->set_short_text( 'MaxH' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'MAX_TIME_HOURS' ) )->set_medium_text( 'Max Hours' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'MAX_TIME_HOURS' ) )->set_long_text( 'Max Confirmation Time (h)' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_short_text( 'TotQy' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_medium_text( 'Total Qty' ).
+          CATCH cx_salv_not_found.
+        ENDTRY.
+        TRY.
             CAST cl_salv_column_table( lo_columns->get_column( 'TOTAL_QTY' ) )->set_long_text( 'Total Quantity Moved' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_short_text( 'Stat' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_medium_text( 'Status' ).
-            CAST cl_salv_column_table( lo_columns->get_column( 'STATUS_ICON' ) )->set_long_text( 'Performance Status' ).
           CATCH cx_salv_not_found.
         ENDTRY.
 
@@ -1474,10 +1450,12 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
         ls_sttype-lgtyp_txt = lv_lgtyp.
       ENDIF.
 
-      " Position in grid (4 columns, variable rows)
-      " Posizione in griglia (4 colonne, righe variabili)
-      ls_sttype-x_pos = ( lv_col MOD 4 ) * 200 + 50.
-      ls_sttype-y_pos = ( lv_col DIV 4 ) * 120 + 50.
+      " Position in grid - compact layout for smaller SVG
+      " Posizione in griglia - layout compatto per SVG ridotto
+      " All boxes on single row, smaller spacing
+      " Tutti i box su singola riga, spaziatura ridotta
+      ls_sttype-x_pos = ( lv_col MOD 8 ) * 100 + 10.
+      ls_sttype-y_pos = 5.
 
       " Count bins from movements
       " Conta ubicazioni dai movimenti
@@ -1712,14 +1690,16 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_simulation_css.
+    " CSS compatto per simulazione - ridotto padding/margin per evitare taglio
+    " Compact CSS for simulation - reduced padding/margin to prevent cutoff
     rv_css =
       |* \{ margin: 0; padding: 0; box-sizing: border-box; \}| &&
       |body \{| &&
       |  font-family: 'Segoe UI', sans-serif;| &&
       |  background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);| &&
       |  color: #fff;| &&
-      |  padding: 10px;| &&
-      |  min-height: 100vh;| &&
+      |  padding: 5px;| &&
+      |  overflow-y: auto;| &&
       |\}| &&
       |.simulation-container \{| &&
       |  max-width: 100%;| &&
@@ -1728,54 +1708,54 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
       |  display: flex;| &&
       |  justify-content: space-between;| &&
       |  align-items: center;| &&
-      |  padding: 15px 20px;| &&
+      |  padding: 8px 12px;| &&
       |  background: rgba(102, 126, 234, 0.2);| &&
-      |  border-radius: 12px;| &&
-      |  margin-bottom: 15px;| &&
+      |  border-radius: 8px;| &&
+      |  margin-bottom: 5px;| &&
       |\}| &&
       |.sim-header h1 \{| &&
-      |  font-size: 18px;| &&
+      |  font-size: 14px;| &&
       |  font-weight: 600;| &&
       |  color: #667eea;| &&
       |\}| &&
       |.time-display \{| &&
-      |  font-size: 16px;| &&
+      |  font-size: 12px;| &&
       |  font-weight: 500;| &&
       |  color: #a0aec0;| &&
       |  background: rgba(0,0,0,0.3);| &&
-      |  padding: 8px 15px;| &&
-      |  border-radius: 8px;| &&
+      |  padding: 4px 10px;| &&
+      |  border-radius: 6px;| &&
       |\}| &&
       |.warehouse-area \{| &&
       |  background: rgba(255,255,255,0.03);| &&
-      |  border-radius: 12px;| &&
-      |  padding: 15px;| &&
-      |  margin-bottom: 15px;| &&
-      |  min-height: 200px;| &&
+      |  border-radius: 8px;| &&
+      |  padding: 5px;| &&
+      |  margin-bottom: 5px;| &&
+      |  min-height: 100px;| &&
       |  position: relative;| &&
       |\}| &&
       |.warehouse-svg \{| &&
       |  width: 100%;| &&
-      |  height: 180px;| &&
+      |  height: 90px;| &&
       |\}| &&
       |.st-box \{| &&
       |  fill: rgba(102, 126, 234, 0.3);| &&
       |  stroke: #667eea;| &&
       |  stroke-width: 2;| &&
-      |  rx: 8;| &&
+      |  rx: 6;| &&
       |\}| &&
       |.st-box:hover \{| &&
       |  fill: rgba(102, 126, 234, 0.5);| &&
       |\}| &&
       |.st-label \{| &&
       |  fill: #fff;| &&
-      |  font-size: 12px;| &&
+      |  font-size: 11px;| &&
       |  font-weight: 600;| &&
       |  text-anchor: middle;| &&
       |\}| &&
       |.st-count \{| &&
       |  fill: #a0aec0;| &&
-      |  font-size: 10px;| &&
+      |  font-size: 9px;| &&
       |  text-anchor: middle;| &&
       |\}| &&
       |.movement-arrow \{| &&
@@ -1791,67 +1771,70 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
       |\}| &&
       |.timeline-control \{| &&
       |  background: rgba(255,255,255,0.05);| &&
-      |  border-radius: 12px;| &&
-      |  padding: 15px;| &&
-      |  margin-bottom: 15px;| &&
+      |  border-radius: 8px;| &&
+      |  padding: 6px 10px;| &&
+      |  margin-bottom: 5px;| &&
       |\}| &&
       |.timeline-bar \{| &&
       |  width: 100%;| &&
-      |  height: 8px;| &&
+      |  height: 6px;| &&
       |  background: rgba(255,255,255,0.1);| &&
-      |  border-radius: 4px;| &&
-      |  margin-bottom: 10px;| &&
+      |  border-radius: 3px;| &&
+      |  margin-bottom: 4px;| &&
       |  position: relative;| &&
       |\}| &&
       |.timeline-progress \{| &&
       |  height: 100%;| &&
       |  background: linear-gradient(90deg, #667eea, #764ba2);| &&
-      |  border-radius: 4px;| &&
+      |  border-radius: 3px;| &&
       |  transition: width 0.3s ease;| &&
       |\}| &&
       |.timeline-info \{| &&
       |  display: flex;| &&
       |  justify-content: space-between;| &&
-      |  font-size: 11px;| &&
+      |  font-size: 10px;| &&
       |  color: #a0aec0;| &&
       |\}| &&
       |.stats-panel \{| &&
       |  background: rgba(255,255,255,0.05);| &&
-      |  border-radius: 12px;| &&
-      |  padding: 15px;| &&
+      |  border-radius: 8px;| &&
+      |  padding: 6px 10px;| &&
       |\}| &&
       |.stat-title \{| &&
-      |  font-size: 12px;| &&
+      |  font-size: 10px;| &&
       |  color: #a0aec0;| &&
       |  text-transform: uppercase;| &&
-      |  letter-spacing: 1px;| &&
-      |  margin-bottom: 10px;| &&
+      |  letter-spacing: 0.5px;| &&
+      |  margin-bottom: 5px;| &&
       |\}| &&
       |.stat-grid \{| &&
       |  display: grid;| &&
-      |  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));| &&
-      |  gap: 10px;| &&
+      |  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));| &&
+      |  gap: 5px;| &&
       |\}| &&
       |.stat-card \{| &&
       |  background: rgba(0,0,0,0.2);| &&
-      |  padding: 10px;| &&
-      |  border-radius: 8px;| &&
-      |  border-left: 3px solid #667eea;| &&
+      |  padding: 5px 8px;| &&
+      |  border-radius: 6px;| &&
+      |  border-left: 2px solid #667eea;| &&
       |\}| &&
       |.stat-type \{| &&
-      |  font-size: 14px;| &&
+      |  font-size: 12px;| &&
       |  font-weight: 600;| &&
       |  color: #667eea;| &&
       |\}| &&
       |.stat-name \{| &&
-      |  font-size: 10px;| &&
+      |  font-size: 9px;| &&
       |  color: #718096;| &&
-      |  margin-bottom: 6px;| &&
+      |  margin-bottom: 3px;| &&
+      |  white-space: nowrap;| &&
+      |  overflow: hidden;| &&
+      |  text-overflow: ellipsis;| &&
       |\}| &&
       |.stat-numbers \{| &&
       |  display: flex;| &&
-      |  gap: 10px;| &&
-      |  font-size: 12px;| &&
+      |  gap: 6px;| &&
+      |  font-size: 10px;| &&
       |\}| &&
       |.stat-numbers .in \{ color: #27ae60; \}| &&
       |.stat-numbers .out \{ color: #e74c3c; \}| &&
@@ -1859,8 +1842,10 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_warehouse_svg.
+    " Dimensioni ridotte per layout compatto
+    " Reduced dimensions for compact layout
     DATA: lv_width  TYPE i VALUE 800,
-          lv_height TYPE i VALUE 180.
+          lv_height TYPE i VALUE 90.
 
     rv_svg =
       |<svg class="warehouse-svg" viewBox="0 0 { lv_width } { lv_height }">| &&
@@ -1879,13 +1864,15 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
         WHEN ls_st-current_stock > 5 THEN '#27ae60'
         ELSE '#667eea' ).
 
+      " Compact box: 90x75 instead of 160x80
+      " Box compatto: 90x75 invece di 160x80
       rv_svg = rv_svg &&
         |<rect class="st-box" x="{ ls_st-x_pos }" y="{ ls_st-y_pos }" | &&
-        |width="160" height="80" style="stroke:{ lv_stock_color }"/>| &&
-        |<text class="st-label" x="{ ls_st-x_pos + 80 }" y="{ ls_st-y_pos + 35 }">| &&
+        |width="90" height="75" style="stroke:{ lv_stock_color }"/>| &&
+        |<text class="st-label" x="{ ls_st-x_pos + 45 }" y="{ ls_st-y_pos + 30 }">| &&
         |{ ls_st-lgtyp }</text>| &&
-        |<text class="st-count" x="{ ls_st-x_pos + 80 }" y="{ ls_st-y_pos + 55 }">| &&
-        |Stock: { ls_st-current_stock }</text>|.
+        |<text class="st-count" x="{ ls_st-x_pos + 45 }" y="{ ls_st-y_pos + 50 }">| &&
+        |Stk:{ ls_st-current_stock }</text>|.
     ENDLOOP.
 
     " Draw movement arrows for current hour
@@ -1900,10 +1887,12 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
         WITH KEY lgtyp = ls_move-to_lgtyp.
 
       IF ls_from IS NOT INITIAL AND ls_to IS NOT INITIAL.
-        DATA(lv_x1) = ls_from-x_pos + 160.
-        DATA(lv_y1) = ls_from-y_pos + 40.
+        " Arrow positions adjusted for smaller boxes (90x75)
+        " Posizioni frecce adattate per box ridotti (90x75)
+        DATA(lv_x1) = ls_from-x_pos + 90.
+        DATA(lv_y1) = ls_from-y_pos + 38.
         DATA(lv_x2) = ls_to-x_pos.
-        DATA(lv_y2) = ls_to-y_pos + 40.
+        DATA(lv_y2) = ls_to-y_pos + 38.
 
         rv_svg = rv_svg &&
           |<line class="movement-arrow" | &&
