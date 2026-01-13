@@ -1,187 +1,319 @@
 # SAP WM Visual Monitoring Dashboard
+# Dashboard SAP WM per Monitoraggio Visuale
 
 Un report ABAP completo per il monitoraggio visuale delle attività di magazzino SAP WM (Warehouse Management) su SAP ECC EHP7.
 
-## Caratteristiche
+A complete ABAP report for visual monitoring of SAP WM (Warehouse Management) warehouse activities on SAP ECC EHP7.
 
-### Dashboard Panoramica
-- **KPI Real-time**: Visualizzazione immediata delle metriche principali
-- **Indicatori di stato**: Semafori colorati per identificare situazioni critiche
-- **Occupazione ubicazioni**: Percentuali e grafici a barre ASCII
-- **Stato ordini di trasferimento**: Conteggio aperti, confermati, in ritardo
+---
 
-### Monitoraggio Ubicazioni
-- Lista completa ubicazioni con stato occupazione
-- Filtro per magazzino, tipo deposito, ubicazione
-- Conteggio quant per ubicazione
-- Indicatore ubicazioni bloccate
-- Colorazione righe in base allo stato
+## Reports Disponibili / Available Reports
 
-### Gestione Ordini di Trasferimento (OT)
-- Lista dettagliata con tutti i campi rilevanti
-- Calcolo automatico tempo di attesa (ore dalla creazione)
-- Stato con icone: Confermato, Aperto, Warning, Critical
-- Filtro per tipo movimento, materiale, date
-- Double-click per dettagli (espandibile)
+| Report | Descrizione / Description |
+|--------|---------------------------|
+| `ZWM_VISUAL_REPORT` | Versione base con visualizzazione ALV standard / Base version with standard ALV display |
+| `ZWM_VISUAL_REPORT_GRAPH` | **NUOVO** Versione grafica avanzata con dashboard HTML e simulazione / **NEW** Enhanced graphical version with HTML dashboard and simulation |
 
-### KPI e Statistiche
-- **KPI per tipo movimento**: Conteggio, tempo medio conferma, min/max
-- **Statistiche giornaliere**: TOs creati/confermati per giorno, peak hours
-- **Aging Analysis**: Distribuzione OT aperti per bucket temporali
-- **Material Flow**: Flussi inbound/outbound/internal per materiale
+---
 
-### Simulazione Movimenti
-- Timeline cronologica dei movimenti
-- Rappresentazione visuale del flusso (origine → destinazione)
-- Riepilogo flussi per materiale
+## Architettura Versione Grafica / Graphical Version Architecture
 
-### Analisi Carichi di Lavoro
-- **Performance utenti**: TOs confermati, efficienza relativa
-- **Heatmap oraria**: Distribuzione attività nelle 24 ore
-- Identificazione peak hours
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    ZWM_VISUAL_REPORT_GRAPH                  │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                 Selection Screen                     │   │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────────────┐    │   │
+│  │  │ Filters  │ │  Dates   │ │  Initial View    │    │   │
+│  │  │ s_lgnum  │ │ p_datfr  │ │ ○ Bins ○ TOs    │    │   │
+│  │  │ s_lgtyp  │ │ p_datto  │ │ ○ KPIs ○ Daily  │    │   │
+│  │  │ s_matnr  │ │          │ │ ○ Users         │    │   │
+│  │  └──────────┘ └──────────┘ └──────────────────┘    │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                            ▼                                │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │               Screen 0100 (Dynpro)                   │   │
+│  │  ┌─────────────────────────────────────────────┐    │   │
+│  │  │         HTML Dashboard (35%)                 │    │   │
+│  │  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐          │    │   │
+│  │  │  │ KPI │ │ KPI │ │ KPI │ │ KPI │          │    │   │
+│  │  │  │Card │ │Card │ │Card │ │Card │          │    │   │
+│  │  │  └─────┘ └─────┘ └─────┘ └─────┘          │    │   │
+│  │  │  ┌──────────────────────────────┐         │    │   │
+│  │  │  │     Progress Rings           │         │    │   │
+│  │  │  │  ◐ Occ  ◐ Conf  ◐ Speed    │         │    │   │
+│  │  │  └──────────────────────────────┘         │    │   │
+│  │  └─────────────────────────────────────────────┘    │   │
+│  │  ┌─────────────────────────────────────────────┐    │   │
+│  │  │           ALV Grid (65%)                     │    │   │
+│  │  │  ┌────┬────┬────┬────┬────┬────┐          │    │   │
+│  │  │  │Whse│Type│ Bin│ Qty│Occ%│Stat│ ← Colors │    │   │
+│  │  │  ├────┼────┼────┼────┼────┼────┤          │    │   │
+│  │  │  │ 100│ 001│AA01│ 150│ 85%│ ██ │ Red      │    │   │
+│  │  │  │ 100│ 001│AA02│  50│ 40%│ ██ │ Green    │    │   │
+│  │  │  │ 100│ 002│AB01│  80│ 65%│ ██ │ Yellow   │    │   │
+│  │  │  └────┴────┴────┴────┴────┴────┘          │    │   │
+│  │  └─────────────────────────────────────────────┘    │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
 
-## Requisiti Tecnici
+---
 
-- SAP ECC EHP7 o superiore
-- ABAP 7.40 o superiore
-- Autorizzazioni per tabelle WM (LAGP, LQUA, LTAP, LTAK, T300, T301, T333T)
+## Viste Disponibili / Available Views
 
-## Installazione via ABAPGit
+### Vista 1: Storage Bins / Ubicazioni
+Mostra tutte le ubicazioni con stato occupazione e codifica colori.
+Shows all storage bins with occupancy status and color coding.
+
+| Colore / Color | Significato / Meaning |
+|----------------|----------------------|
+| 🟢 Verde / Green | Vuoto o bassa occupazione / Empty or low occupancy |
+| 🟡 Giallo / Yellow | Alta occupazione (>60%) / High occupancy (>60%) |
+| 🔴 Rosso / Red | Bloccato o critico (>85%) / Blocked or critical (>85%) |
+
+### Vista 2: Transfer Orders / Ordini di Trasferimento
+Mostra ordini di trasferimento con tempo attesa e stato conferma.
+Shows transfer orders with wait time and confirmation status.
+
+| Colore / Color | Significato / Meaning |
+|----------------|----------------------|
+| 🟢 Verde / Green | Confermato / Confirmed |
+| 🔵 Blu / Blue | Nuovo, entro SLA / New, within SLA |
+| 🟡 Giallo / Yellow | Attesa > 4 ore / Waiting > 4 hours |
+| 🔴 Rosso / Red | Attesa > 8 ore / Waiting > 8 hours |
+
+### Vista 3: Movement KPIs / KPI Movimenti
+Statistiche aggregate per tipo movimento.
+Aggregated statistics by movement type.
+
+### Vista 4: Storage Type Summary / Riepilogo Tipi Storage
+Riepilogo per tipo storage con barre occupazione.
+Summary by storage type with occupancy bars.
+
+### Vista 5: Daily Statistics / Statistiche Giornaliere
+Trend attività giornaliera per TO creati e confermati.
+Daily activity trends for TOs created and confirmed.
+
+### Vista 6: User Workload / Carico Lavoro Utenti
+Metriche produttività per utente.
+Productivity metrics per user.
+
+### Vista 7: Movement Simulation / Simulazione Movimenti (NEW!)
+Visualizzazione animata del flusso materiali nel magazzino.
+Animated visualization of warehouse material flow.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  Movement Simulation                         │
+│                  Simulazione Movimenti                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   ┌──────────┐         ┌──────────┐         ┌──────────┐   │
+│   │  TYPE A  │ ──────► │  TYPE B  │ ──────► │  TYPE C  │   │
+│   │  Stock:5 │         │  Stock:12│         │  Stock:3 │   │
+│   └──────────┘         └──────────┘         └──────────┘   │
+│                                                              │
+│   Timeline: ████████████░░░░░░░░░░░░  Hour 8 of 24         │
+│                                                              │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │ Storage Type Activity / Attività Tipi Storage       │   │
+│   │ TYPE A: ↓5  ↑3  =2    TYPE B: ↓8  ↑4  =4           │   │
+│   │ TYPE C: ↓2  ↑6  =-4   TYPE D: ↓1  ↑1  =0           │   │
+│   └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Codici Funzione / Function Codes
+
+| Codice | Testo Pulsante | Descrizione / Description |
+|--------|----------------|--------------------------|
+| BACK | Back | Torna a schermata selezione / Return to selection screen |
+| EXIT | Exit | Esci dal report / Exit report |
+| REFRESH | Refresh | Ricarica dati dal database / Reload data from database |
+| VIEW_BINS | Bins | Mostra vista ubicazioni / Show storage bins view |
+| VIEW_TO | TOs | Mostra vista TO / Show transfer orders view |
+| VIEW_KPI | KPIs | Mostra vista KPI / Show movement KPIs view |
+| VIEW_STSUM | Summary | Mostra riepilogo storage / Show storage type summary |
+| VIEW_DAILY | Daily | Mostra statistiche giornaliere / Show daily statistics |
+| VIEW_USERS | Users | Mostra carico utenti / Show user workload |
+| VIEW_SIM | Simulation | Mostra simulazione / Show movement simulation |
+| SIM_FWD | ► | Avanza nella simulazione / Step forward in simulation |
+| SIM_BACK | ◄ | Torna indietro / Step backward |
+| SIM_RESET | ⏮ | Reset all'inizio / Reset to start |
+
+---
+
+## Diagramma Classi / Class Diagram
+
+```
+┌──────────────────────────────────┐
+│      lcl_data_extractor          │  (Base - from ZWM_VISUAL_REPORT)
+├──────────────────────────────────┤
+│ + extract_storage_bins()         │
+│ + extract_transfer_orders()      │
+│ + get_storage_type_summary()     │
+│ + get_movement_kpis()            │
+│ + get_daily_statistics()         │
+│ + get_user_workload()            │
+└──────────────────────────────────┘
+              △
+              │ uses / utilizza
+┌──────────────────────────────────┐
+│     lcl_controller_graph         │  (Singleton)
+├──────────────────────────────────┤
+│ - mo_extractor                   │
+│ - mo_dashboard                   │
+│ - mo_alv_handler                 │
+│ - mo_simulator                   │
+├──────────────────────────────────┤
+│ + get_instance()                 │
+│ + initialize()                   │
+│ + load_all_data()                │
+│ + get_dashboard_html()           │
+│ + get_simulation_html()          │
+│ + display_current_view()         │
+│ + set_view() / get_current_view()│
+│ + sim_step_forward/back/reset()  │
+└──────────────────────────────────┘
+              │
+    ┌─────────┼─────────┐
+    ▽         ▽         ▽
+┌─────────┐ ┌─────────┐ ┌─────────────────┐
+│ lcl_    │ │ lcl_    │ │ lcl_movement_   │
+│ html_   │ │ alv_    │ │ simulator       │
+│ dash    │ │ handler │ │                 │
+│ board   │ │ _graph  │ │                 │
+│ _modern │ │         │ │                 │
+└─────────┘ └─────────┘ └─────────────────┘
+```
+
+---
+
+## Requisiti Tecnici / Technical Requirements
+
+- SAP ECC EHP7 o superiore / SAP ECC EHP7 or higher
+- ABAP 7.40 o superiore / ABAP 7.40 or higher
+- Autorizzazioni per tabelle WM / Authorization for WM tables (LAGP, LQUA, LTAP, LTAK, T300, T301, T333T)
+
+## Tabelle SAP WM Utilizzate / SAP WM Tables Used
+
+| Tabella / Table | Descrizione / Description |
+|-----------------|---------------------------|
+| LAGP | Anagrafica ubicazioni / Storage bins master data |
+| LQUA | Quant (quantità stock) / Quants (stock quantities) |
+| LTAK | Testata ordine di trasferimento / Transfer order header |
+| LTAP | Posizioni ordine di trasferimento / Transfer order items |
+| MAKT | Descrizioni materiale / Material descriptions |
+| T301T | Descrizioni tipi storage / Storage type descriptions |
+
+---
+
+## Installazione / Installation
+
+### Via ABAPGit
 
 1. Installare ABAPGit nel sistema SAP (se non già presente)
+   Install ABAPGit in SAP system (if not already present)
 2. Creare un nuovo repository online in ABAPGit
+   Create a new online repository in ABAPGit
 3. Inserire l'URL di questo repository GitHub
+   Enter this GitHub repository URL
 4. Selezionare un package di destinazione (es. ZWMREPORT)
+   Select a destination package (e.g. ZWMREPORT)
 5. Eseguire il Pull
-6. Attivare tutti gli oggetti
+   Execute Pull
 
-## Struttura Files
+### Post-Import Steps for Graphical Version
+
+1. **Creare dynpro 0100** manualmente in SE80:
+   - Custom container: `CC_MAIN`
+   - OK code field: (non necessario, usa sy-ucomm)
+
+   **Create dynpro 0100** manually in SE80:
+   - Custom container: `CC_MAIN`
+   - OK code field: (not needed, uses sy-ucomm)
+
+2. **Creare PF-STATUS** `STATUS_GRAPH` con i codici funzione elencati sopra
+   **Create PF-STATUS** `STATUS_GRAPH` with the function codes listed above
+
+3. **Creare TITLEBAR** `TITLE_GRAPH`
+   **Create TITLEBAR** `TITLE_GRAPH`
+
+---
+
+## Struttura Files / File Structure
 
 ```
 src/
-├── zwm_visual_report.prog.abap      # Programma principale
-├── zwm_visual_report.prog.xml       # Metadati programma
-├── zwm_visual_report_top.prog.abap  # Definizioni globali, tipi, costanti
-├── zwm_visual_report_cls.prog.abap  # Classi locali (estrattori, controller)
-├── zwm_visual_report_scr.prog.abap  # Selection screen
-├── zwm_visual_report_pbo.prog.abap  # Moduli PBO
-├── zwm_visual_report_pai.prog.abap  # Moduli PAI
-├── zwm_visual_report_frm.prog.abap  # Subroutine e helper
-├── zwm_visual_report.prog.texts.en.txt  # Testi inglese
-├── zwm_visual_report.prog.texts.it.txt  # Testi italiano
-└── package.devc.xml                 # Definizione package
+├── zwm_visual_report.prog.abap          # Report base / Base report
+├── zwm_visual_report_top.prog.abap      # Tipi base / Base types
+├── zwm_visual_report_cls.prog.abap      # Classi base / Base classes
+├── zwm_visual_report_scr.prog.abap      # Selection screen base
+├── zwm_visual_report_pbo.prog.abap      # PBO base
+├── zwm_visual_report_pai.prog.abap      # PAI base
+├── zwm_visual_report_frm.prog.abap      # Form base
+│
+├── zwm_visual_report_graph.prog.abap    # Report grafico (main) / Graphical report
+├── zwm_visual_report_graph_top.prog.abap # Tipi estesi / Extended types
+├── zwm_visual_report_graph_cls.prog.abap # Classi grafiche / Graphical classes
+├── zwm_visual_report_graph_scr.prog.abap # Selection screen grafico
+├── zwm_visual_report_graph_pbo.prog.abap # Moduli PBO grafici / PBO modules
+├── zwm_visual_report_graph_pai.prog.abap # Moduli PAI grafici / PAI modules
+└── zwm_visual_report_graph_frm.prog.abap # Form routines grafiche
 ```
 
-## Utilizzo
+---
 
-1. Eseguire transazione SE38 → ZWM_VISUAL_REPORT
-2. Inserire almeno un numero magazzino (obbligatorio)
-3. Opzionalmente filtrare per:
-   - Tipo deposito
-   - Ubicazione
-   - Materiale
-   - Tipo movimento
-   - Range date (default: ultimi 30 giorni)
-4. Selezionare la modalità di visualizzazione:
-   - **Overview Dashboard**: Vista panoramica con KPI
-   - **Storage Bins**: Lista ubicazioni
-   - **Transfer Orders**: Lista OT
-   - **KPI Statistics**: Dashboard statistiche
-   - **Movement Simulation**: Timeline movimenti
-   - **Workload Analysis**: Analisi carichi
+## Decisioni di Design Chiave / Key Design Decisions
 
-## Funzionalità ABAP 7.40
+1. **Pattern Singleton per Controller / Singleton Pattern for Controller**
+   - Garantisce singola istanza in tutti i moduli
+   - Mantiene lo stato tra chiamate PBO/PAI
+   - Ensures single instance across all modules
+   - Maintains state between PBO/PAI calls
 
-Il report utilizza le seguenti funzionalità moderne di ABAP:
+2. **Variabili di Istanza per Dati ALV / Instance Variables for ALV Data**
+   - Dati memorizzati in istanza classe, non variabili locali
+   - Previene dump GETWA_NOT_ASSIGNED durante scrolling
+   - Data stored in class instance, not local variables
+   - Prevents GETWA_NOT_ASSIGNED dump on scrolling
 
-- **Inline declarations**: `DATA(lv_var) = ...`
-- **Constructor expressions**: `VALUE #()`, `NEW #()`, `CONV #()`, `COND #()`, `SWITCH #()`
-- **String templates**: `|text { variable } more text|`
-- **Table expressions**: `itab[ key = value ]`
-- **FOR expressions**: `VALUE #( FOR wa IN itab ... )`
-- **REDUCE**: Per aggregazioni inline
-- **GROUP BY**: Per raggruppamento dati nelle loop
+3. **sy-ucomm per Codici Funzione / sy-ucomm for Function Codes**
+   - Approccio standard SAP, più affidabile dei campi schermata
+   - Standard SAP approach, more reliable than screen fields
 
-## Classi Principali
+4. **LVC_T_SCOL per Colori Riga / LVC_T_SCOL for Row Colors**
+   - Tipo corretto per colorazione celle/righe ALV
+   - Proper type for ALV cell/row coloring
 
-### lcl_utilities
-Metodi statici di utilità:
-- `get_status_icon()`: Converte stato in icona
-- `calculate_hours_diff()`: Calcola differenza ore tra timestamp
-- `generate_bar_graph()`: Genera barre ASCII per visualizzazione
-- `calc_percentage()`: Calcolo percentuali
-- `get_day_name()`: Nome giorno da data
+---
 
-### lcl_data_extractor
-Estrazione dati da tabelle WM:
-- `extract_storage_bins()`: Ubicazioni con occupazione
-- `extract_transfer_orders()`: OT con calcolo tempi
-- `get_storage_type_summary()`: Riepilogo per tipo deposito
-- `get_movement_kpis()`: KPI per tipo movimento
-- `get_workload_analysis()`: Analisi workload oraria
-- `get_user_workload()`: Performance utenti
-- `get_daily_statistics()`: Statistiche giornaliere
-- `get_aging_analysis()`: Aging OT aperti
-- `get_material_flow()`: Flussi materiali
+## Soglie Personalizzabili / Customizable Thresholds
 
-### lcl_html_dashboard
-Generazione HTML per dashboard visuale:
-- `generate_overview_html()`: Dashboard completa HTML
-- `generate_kpi_card()`: Card singolo KPI
-- `generate_progress_bar()`: Barre di progresso CSS
-
-### lcl_alv_handler
-Gestione visualizzazioni ALV:
-- Display methods per ogni tipo dato
-- Gestione colori righe
-- Gestione eventi (double-click)
-
-### lcl_controller
-Controller principale:
-- `initialize()`: Inizializzazione con parametri selezione
-- `load_all_data()`: Caricamento tutti i dati
-- `calculate_global_kpis()`: Calcolo KPI globali
-- `display_overview()`: Visualizzazione dashboard
-- `display_by_tab()`: Visualizzazione per tab
-
-## Tabelle SAP WM Utilizzate
-
-| Tabella | Descrizione |
-|---------|-------------|
-| LAGP | Master ubicazioni |
-| LQUA | Quants (stock per ubicazione) |
-| LTAP | Posizioni ordini di trasferimento |
-| LTAK | Testata ordini di trasferimento |
-| T300 | Numeri magazzino |
-| T301 | Tipi deposito |
-| T301T | Testi tipi deposito |
-| T333T | Testi tipi movimento |
-| MAKT | Testi materiale |
-
-## Personalizzazione
-
-### Soglie Indicatori
 Nel file `zwm_visual_report_top.prog.abap`:
+In file `zwm_visual_report_top.prog.abap`:
+
 ```abap
-gc_occupancy_high TYPE p VALUE '85.00',  " Soglia occupazione alta
-gc_occupancy_med  TYPE p VALUE '60.00',  " Soglia occupazione media
-gc_to_time_good   TYPE i VALUE 4,        " Ore per stato "buono"
-gc_to_time_warn   TYPE i VALUE 8,        " Ore per stato "warning"
+gc_occupancy_high TYPE p VALUE '85.00',  " Soglia occupazione alta / High occupancy threshold
+gc_occupancy_med  TYPE p VALUE '60.00',  " Soglia occupazione media / Medium occupancy threshold
+gc_to_time_good   TYPE i VALUE 4,        " Ore per stato "buono" / Hours for "good" status
+gc_to_time_warn   TYPE i VALUE 8,        " Ore per stato "warning" / Hours for "warning" status
 ```
 
-### Limiti Record
-```abap
-gc_max_records TYPE i VALUE 100000,      " Max record per query
-```
+---
 
-## Licenza
+## Licenza / License
 
-Questo software è fornito "as is" per uso interno SAP.
+MIT License
 
-## Autore
+## Autore / Author
 
-Sviluppato con Claude Code (Anthropic) per SAP ECC EHP7 / ABAP 7.40
+Sviluppato con Claude AI (Anthropic) / Developed with Claude AI (Anthropic)
 
-## Versione
+## Versione / Version
 
-1.0.0 - Release iniziale
+2.0.0 - Aggiunta versione grafica con simulazione / Added graphical version with simulation
