@@ -194,6 +194,73 @@ DATA:
 * Global Variables - Control for Graphical Version
 *----------------------------------------------------------------------*
 DATA:
-  gv_okcode_graph     TYPE sy-ucomm,
+  gv_okcode_graph      TYPE sy-ucomm,
   gv_graph_initialized TYPE abap_bool,
-  gv_current_view     TYPE i VALUE 1.
+  gv_current_view      TYPE i VALUE 1,
+  gv_last_view_pbo     TYPE i VALUE 0.
+
+*----------------------------------------------------------------------*
+* Types - Movement Simulation
+*----------------------------------------------------------------------*
+TYPES:
+  " Single movement event for simulation
+  BEGIN OF gty_sim_movement,
+    event_time    TYPE timestamp,       " When movement happened
+    event_date    TYPE sydatum,
+    event_hour    TYPE i,
+    event_minute  TYPE i,
+    tanum         TYPE ltak-tanum,
+    tapos         TYPE ltap-tapos,
+    matnr         TYPE ltap-matnr,
+    maktx         TYPE makt-maktx,
+    quantity      TYPE ltap-vsolm,
+    meins         TYPE ltap-meins,
+    from_lgtyp    TYPE ltap-vltyp,
+    from_lgpla    TYPE ltap-vlpla,
+    to_lgtyp      TYPE ltap-nltyp,
+    to_lgpla      TYPE ltap-nlpla,
+    movement_type TYPE ltak-bwlvs,
+    is_confirmed  TYPE abap_bool,
+  END OF gty_sim_movement,
+
+  gty_sim_movements TYPE STANDARD TABLE OF gty_sim_movement WITH DEFAULT KEY,
+
+  " Storage type state for simulation
+  BEGIN OF gty_sim_storage_type,
+    lgtyp         TYPE lagp-lgtyp,
+    lgtyp_txt     TYPE t301t-ltypt,
+    total_bins    TYPE i,
+    current_stock TYPE i,
+    incoming      TYPE i,
+    outgoing      TYPE i,
+    x_pos         TYPE i,            " Position for visualization
+    y_pos         TYPE i,
+  END OF gty_sim_storage_type,
+
+  gty_sim_storage_types TYPE STANDARD TABLE OF gty_sim_storage_type WITH DEFAULT KEY,
+
+  " Active movement for animation
+  BEGIN OF gty_sim_active_move,
+    from_lgtyp    TYPE lagp-lgtyp,
+    to_lgtyp      TYPE lagp-lgtyp,
+    matnr         TYPE ltap-matnr,
+    quantity      TYPE ltap-vsolm,
+    progress_pct  TYPE i,           " 0-100 animation progress
+  END OF gty_sim_active_move,
+
+  gty_sim_active_moves TYPE STANDARD TABLE OF gty_sim_active_move WITH DEFAULT KEY.
+
+*----------------------------------------------------------------------*
+* Global Variables - Simulation State
+*----------------------------------------------------------------------*
+DATA:
+  gt_sim_movements     TYPE gty_sim_movements,
+  gt_sim_storage_types TYPE gty_sim_storage_types,
+  gt_sim_active_moves  TYPE gty_sim_active_moves,
+  gv_sim_current_time  TYPE timestamp,
+  gv_sim_start_time    TYPE timestamp,
+  gv_sim_end_time      TYPE timestamp,
+  gv_sim_speed         TYPE i VALUE 1,          " 1=normal, 2=2x, etc
+  gv_sim_playing       TYPE abap_bool,
+  gv_sim_current_hour  TYPE i,
+  gv_sim_current_idx   TYPE i VALUE 1.

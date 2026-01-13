@@ -79,10 +79,16 @@ MODULE init_screen OUTPUT.
     gv_graph_initialized = abap_true.
   ENDIF.
 
-  " Load dashboard HTML
+  " Load dashboard or simulation HTML based on current view
   IF go_html_dashboard IS BOUND.
     lo_controller = lcl_controller_graph=>get_instance( ).
-    lv_html_str = lo_controller->get_dashboard_html( ).
+
+    " Use simulation HTML for view 7, otherwise use dashboard
+    IF lo_controller->get_current_view( ) = 7.
+      lv_html_str = lo_controller->get_simulation_html( ).
+    ELSE.
+      lv_html_str = lo_controller->get_dashboard_html( ).
+    ENDIF.
 
     " Convert HTML string to table (w3html has 255 chars)
     CLEAR lt_html.
@@ -118,12 +124,11 @@ ENDMODULE.
 *&---------------------------------------------------------------------*
 MODULE display_alv OUTPUT.
   DATA: lo_ctrl TYPE REF TO lcl_controller_graph.
-  STATICS: sv_last_view TYPE i VALUE 0.
 
   lo_ctrl = lcl_controller_graph=>get_instance( ).
 
   " Only recreate ALV if view changed or first time
-  IF sv_last_view <> lo_ctrl->get_current_view( ) OR
+  IF gv_last_view_pbo <> lo_ctrl->get_current_view( ) OR
      lo_ctrl->mo_alv_handler->mo_salv IS NOT BOUND.
 
     " Free previous SALV instance
@@ -132,6 +137,6 @@ MODULE display_alv OUTPUT.
     ENDIF.
 
     lo_ctrl->display_current_view( ).
-    sv_last_view = lo_ctrl->get_current_view( ).
+    gv_last_view_pbo = lo_ctrl->get_current_view( ).
   ENDIF.
 ENDMODULE.

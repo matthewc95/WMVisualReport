@@ -63,5 +63,21 @@ MODULE user_command_0100 INPUT.
       lo_ctrl_pai->set_view( 6 ).
       gv_graph_initialized = abap_false.
 
+    WHEN 'VIEW_SIM'.
+      lo_ctrl_pai->set_view( 7 ).
+      gv_graph_initialized = abap_false.
+
+    WHEN 'SIM_FWD'.
+      lo_ctrl_pai->sim_step_forward( ).
+      gv_graph_initialized = abap_false.
+
+    WHEN 'SIM_BACK'.
+      lo_ctrl_pai->sim_step_backward( ).
+      gv_graph_initialized = abap_false.
+
+    WHEN 'SIM_RESET'.
+      lo_ctrl_pai->sim_reset( ).
+      gv_graph_initialized = abap_false.
+
   ENDCASE.
 ENDMODULE.
