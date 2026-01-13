@@ -1663,22 +1663,25 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_simulation_html.
-    DATA: lv_target_date TYPE sydatum,
-          lv_target_hour TYPE i,
-          lv_time_str    TYPE string,
-          lv_progress    TYPE p LENGTH 5 DECIMALS 1.
+    DATA: lv_target_date   TYPE sydatum,
+          lv_target_hour   TYPE i,
+          lv_time_str      TYPE string,
+          lv_progress      TYPE p LENGTH 5 DECIMALS 1,
+          lv_date_str      TYPE c LENGTH 10.
 
     " Calculate current time based on mode
     " Calcola ora corrente in base alla modalità
     IF mv_daily_mode = abap_true.
       " Daily mode - show only date / Modalità giornaliera - mostra solo data
       lv_target_date = mv_min_date + mv_current_hour.
-      lv_time_str = |{ lv_target_date DATE = USER }|.
+      WRITE lv_target_date TO lv_date_str.
+      lv_time_str = lv_date_str.
     ELSE.
       " Hourly mode - show date and hour / Modalità oraria - mostra data e ora
       lv_target_date = mv_min_date + ( mv_current_hour DIV 24 ).
       lv_target_hour = mv_current_hour MOD 24.
-      lv_time_str = |{ lv_target_date DATE = USER } { lv_target_hour }:00|.
+      WRITE lv_target_date TO lv_date_str.
+      lv_time_str = |{ lv_date_str } { lv_target_hour }:00|.
     ENDIF.
 
     " Calculate progress percentage
@@ -1969,23 +1972,28 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_timeline_control.
-    DATA: lv_progress   TYPE p LENGTH 5 DECIMALS 1,
-          lv_start_str  TYPE string,
-          lv_end_str    TYPE string,
-          lv_step_label TYPE string.
+    DATA: lv_progress     TYPE p LENGTH 5 DECIMALS 1,
+          lv_start_str    TYPE string,
+          lv_end_str      TYPE string,
+          lv_step_label   TYPE string,
+          lv_curr_date    TYPE sydatum,
+          lv_curr_date_c  TYPE c LENGTH 10.
 
     IF mv_total_steps > 0.
       lv_progress = ( mv_current_hour / mv_total_steps ) * 100.
     ENDIF.
 
-    lv_start_str = |{ mv_min_date DATE = USER }|.
-    lv_end_str = |{ mv_max_date DATE = USER }|.
+    " Format dates using WRITE TO (DATE = USER not allowed in string templates)
+    " Formatta date usando WRITE TO (DATE = USER non permesso in template stringa)
+    WRITE mv_min_date TO lv_start_str.
+    WRITE mv_max_date TO lv_end_str.
 
     " Different label for daily vs hourly mode
     " Etichetta diversa per modalità giornaliera vs oraria
     IF mv_daily_mode = abap_true.
-      DATA(lv_curr_date) = mv_min_date + mv_current_hour.
-      lv_step_label = |Day / Giorno { mv_current_hour + 1 } of / di { mv_total_steps } ({ lv_curr_date DATE = USER })|.
+      lv_curr_date = mv_min_date + mv_current_hour.
+      WRITE lv_curr_date TO lv_curr_date_c.
+      lv_step_label = |Day / Giorno { mv_current_hour + 1 } of / di { mv_total_steps } ({ lv_curr_date_c })|.
     ELSE.
       lv_step_label = |Hour / Ora { mv_current_hour + 1 } of / di { mv_total_steps }|.
     ENDIF.
