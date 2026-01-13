@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_PROG" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
@@ -86,10 +86,21 @@
       <MODAL>P</MODAL>
       <PFKCODE>000001</PFKCODE>
       <BUTCODE>0001</BUTCODE>
-      <INT_NOTE>Dashboard Status</INT_NOTE>
+      <INT_NOTE>Dashboard Status with Simulation</INT_NOTE>
      </RSMPE_STAT>
     </STA>
     <FUN>
+     <RSMPE_FUNT>
+      <CODE>BACK</CODE>
+      <TEXTNO>001</TEXTNO>
+      <TYPE>E</TYPE>
+      <TEXT_TYPE>S</TEXT_TYPE>
+      <TEXT_NAME>ICON_SYSTEM_BACK</TEXT_NAME>
+      <ICON_ID>@UV@</ICON_ID>
+      <FUN_TEXT>Back</FUN_TEXT>
+      <ICON_TEXT>Back</ICON_TEXT>
+      <PATH>B</PATH>
+     </RSMPE_FUNT>
      <RSMPE_FUNT>
       <CODE>CANC</CODE>
       <TEXTNO>001</TEXTNO>
@@ -102,19 +113,51 @@
       <PATH>A</PATH>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
+      <CODE>EXIT</CODE>
+      <TEXTNO>001</TEXTNO>
+      <TYPE>E</TYPE>
+      <TEXT_TYPE>S</TEXT_TYPE>
+      <TEXT_NAME>ICON_SYSTEM_END</TEXT_NAME>
+      <ICON_ID>@UW@</ICON_ID>
+      <FUN_TEXT>Exit</FUN_TEXT>
+      <ICON_TEXT>Exit</ICON_TEXT>
+      <PATH>E</PATH>
+     </RSMPE_FUNT>
+     <RSMPE_FUNT>
       <CODE>REFRESH</CODE>
       <TEXTNO>001</TEXTNO>
       <TEXT_TYPE>S</TEXT_TYPE>
       <TEXT_NAME>ICON_REFRESH</TEXT_NAME>
       <ICON_ID>@42@</ICON_ID>
-      <FUN_TEXT>Continue</FUN_TEXT>
+      <FUN_TEXT>Refresh Data</FUN_TEXT>
       <ICON_TEXT>Refresh</ICON_TEXT>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
-      <CODE>REFRESH</CODE>
-      <TEXTNO>002</TEXTNO>
+      <CODE>SIM_BACK</CODE>
+      <TEXTNO>001</TEXTNO>
       <TEXT_TYPE>S</TEXT_TYPE>
-      <FUN_TEXT>Refresh</FUN_TEXT>
+      <TEXT_NAME>ICON_PREVIOUS_OBJECT</TEXT_NAME>
+      <ICON_ID>@0E@</ICON_ID>
+      <FUN_TEXT>Sim Backward</FUN_TEXT>
+      <ICON_TEXT>Sim Back</ICON_TEXT>
+     </RSMPE_FUNT>
+     <RSMPE_FUNT>
+      <CODE>SIM_FWD</CODE>
+      <TEXTNO>001</TEXTNO>
+      <TEXT_TYPE>S</TEXT_TYPE>
+      <TEXT_NAME>ICON_NEXT_OBJECT</TEXT_NAME>
+      <ICON_ID>@0F@</ICON_ID>
+      <FUN_TEXT>Sim Forward</FUN_TEXT>
+      <ICON_TEXT>Sim Fwd</ICON_TEXT>
+     </RSMPE_FUNT>
+     <RSMPE_FUNT>
+      <CODE>SIM_RESET</CODE>
+      <TEXTNO>001</TEXTNO>
+      <TEXT_TYPE>S</TEXT_TYPE>
+      <TEXT_NAME>ICON_REFRESH</TEXT_NAME>
+      <ICON_ID>@42@</ICON_ID>
+      <FUN_TEXT>Sim Reset</FUN_TEXT>
+      <ICON_TEXT>Sim Reset</ICON_TEXT>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
       <CODE>VIEW_BINS</CODE>
@@ -122,7 +165,8 @@
       <TEXT_TYPE>S</TEXT_TYPE>
       <TEXT_NAME>ICON_BIW_INFO_CUBE</TEXT_NAME>
       <ICON_ID>@6H@</ICON_ID>
-      <FUN_TEXT>Bins</FUN_TEXT>
+      <FUN_TEXT>Storage Bins</FUN_TEXT>
+      <ICON_TEXT>Bins</ICON_TEXT>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
       <CODE>VIEW_DAILY</CODE>
@@ -130,7 +174,8 @@
       <TEXT_TYPE>S</TEXT_TYPE>
       <TEXT_NAME>ICON_DATE</TEXT_NAME>
       <ICON_ID>@1U@</ICON_ID>
-      <FUN_TEXT>Daily</FUN_TEXT>
+      <FUN_TEXT>Daily Statistics</FUN_TEXT>
+      <ICON_TEXT>Daily</ICON_TEXT>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
       <CODE>VIEW_KPI</CODE>
@@ -138,7 +183,17 @@
       <TEXT_TYPE>S</TEXT_TYPE>
       <TEXT_NAME>ICON_GRAPHICS</TEXT_NAME>
       <ICON_ID>@0N@</ICON_ID>
-      <FUN_TEXT>KPIs</FUN_TEXT>
+      <FUN_TEXT>Movement KPIs</FUN_TEXT>
+      <ICON_TEXT>KPIs</ICON_TEXT>
+     </RSMPE_FUNT>
+     <RSMPE_FUNT>
+      <CODE>VIEW_SIM</CODE>
+      <TEXTNO>001</TEXTNO>
+      <TEXT_TYPE>S</TEXT_TYPE>
+      <TEXT_NAME>ICON_SIMULATE</TEXT_NAME>
+      <ICON_ID>@48@</ICON_ID>
+      <FUN_TEXT>Simulation</FUN_TEXT>
+      <ICON_TEXT>Simulation</ICON_TEXT>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
       <CODE>VIEW_STSUM</CODE>
@@ -146,7 +201,8 @@
       <TEXT_TYPE>S</TEXT_TYPE>
       <TEXT_NAME>ICON_SUM</TEXT_NAME>
       <ICON_ID>@3Z@</ICON_ID>
-      <FUN_TEXT>Summary</FUN_TEXT>
+      <FUN_TEXT>Storage Summary</FUN_TEXT>
+      <ICON_TEXT>Summary</ICON_TEXT>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
       <CODE>VIEW_TO</CODE>
@@ -154,7 +210,8 @@
       <TEXT_TYPE>S</TEXT_TYPE>
       <TEXT_NAME>ICON_TRANSFER</TEXT_NAME>
       <ICON_ID>@KB@</ICON_ID>
-      <FUN_TEXT>TOs</FUN_TEXT>
+      <FUN_TEXT>Transfer Orders</FUN_TEXT>
+      <ICON_TEXT>TOs</ICON_TEXT>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
       <CODE>VIEW_USERS</CODE>
@@ -162,7 +219,8 @@
       <TEXT_TYPE>S</TEXT_TYPE>
       <TEXT_NAME>ICON_EMPLOYEE</TEXT_NAME>
       <ICON_ID>@5W@</ICON_ID>
-      <FUN_TEXT>Users</FUN_TEXT>
+      <FUN_TEXT>User Workload</FUN_TEXT>
+      <ICON_TEXT>Users</ICON_TEXT>
      </RSMPE_FUNT>
     </FUN>
     <BUT>
@@ -170,58 +228,82 @@
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
       <NO>02</NO>
-      <PFNO>12</PFNO>
+      <PFNO>03</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
       <NO>03</NO>
-      <PFNO>05</PFNO>
+      <PFNO>12</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
       <NO>04</NO>
-      <PFNO>02</PFNO>
+      <PFNO>05</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
       <NO>05</NO>
-      <PFNO>06</PFNO>
+      <PFNO>02</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
       <NO>06</NO>
-      <PFNO>07</PFNO>
+      <PFNO>06</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
       <NO>07</NO>
-      <PFNO>08</PFNO>
+      <PFNO>07</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
       <NO>08</NO>
-      <PFNO>09</PFNO>
+      <PFNO>08</PFNO>
      </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000001</PFK_CODE>
       <CODE>0001</CODE>
       <NO>09</NO>
+      <PFNO>09</PFNO>
+     </RSMPE_BUT>
+     <RSMPE_BUT>
+      <PFK_CODE>000001</PFK_CODE>
+      <CODE>0001</CODE>
+      <NO>10</NO>
+      <PFNO>10</PFNO>
+     </RSMPE_BUT>
+     <RSMPE_BUT>
+      <PFK_CODE>000001</PFK_CODE>
+      <CODE>0001</CODE>
+      <NO>11</NO>
       <PFNO>11</PFNO>
+     </RSMPE_BUT>
+     <RSMPE_BUT>
+      <PFK_CODE>000001</PFK_CODE>
+      <CODE>0001</CODE>
+      <NO>13</NO>
+      <PFNO>14</PFNO>
+     </RSMPE_BUT>
+     <RSMPE_BUT>
+      <PFK_CODE>000001</PFK_CODE>
+      <CODE>0001</CODE>
+      <NO>14</NO>
+      <PFNO>15</PFNO>
+     </RSMPE_BUT>
+     <RSMPE_BUT>
+      <PFK_CODE>000001</PFK_CODE>
+      <CODE>0001</CODE>
+      <NO>15</NO>
+      <PFNO>16</PFNO>
      </RSMPE_BUT>
     </BUT>
     <PFK>
-     <RSMPE_PFK>
-      <CODE>000001</CODE>
-      <PFNO>00</PFNO>
-      <FUNCODE>REFRESH</FUNCODE>
-      <FUNNO>002</FUNNO>
-     </RSMPE_PFK>
      <RSMPE_PFK>
       <CODE>000001</CODE>
       <PFNO>02</PFNO>
@@ -230,9 +312,15 @@
      </RSMPE_PFK>
      <RSMPE_PFK>
       <CODE>000001</CODE>
+      <PFNO>03</PFNO>
+      <FUNCODE>BACK</FUNCODE>
+      <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
       <PFNO>05</PFNO>
       <FUNCODE>REFRESH</FUNCODE>
-      <FUNNO>002</FUNNO>
+      <FUNNO>001</FUNNO>
      </RSMPE_PFK>
      <RSMPE_PFK>
       <CODE>000001</CODE>
@@ -260,8 +348,14 @@
      </RSMPE_PFK>
      <RSMPE_PFK>
       <CODE>000001</CODE>
-      <PFNO>11</PFNO>
+      <PFNO>10</PFNO>
       <FUNCODE>VIEW_USERS</FUNCODE>
+      <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
+      <PFNO>11</PFNO>
+      <FUNCODE>VIEW_SIM</FUNCODE>
       <FUNNO>001</FUNNO>
      </RSMPE_PFK>
      <RSMPE_PFK>
@@ -270,15 +364,53 @@
       <FUNCODE>CANC</FUNCODE>
       <FUNNO>001</FUNNO>
      </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
+      <PFNO>14</PFNO>
+      <FUNCODE>SIM_BACK</FUNCODE>
+      <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
+      <PFNO>15</PFNO>
+      <FUNCODE>SIM_FWD</FUNCODE>
+      <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000001</CODE>
+      <PFNO>16</PFNO>
+      <FUNCODE>SIM_RESET</FUNCODE>
+      <FUNNO>001</FUNNO>
+     </RSMPE_PFK>
     </PFK>
     <SET>
+     <RSMPE_STAF>
+      <STATUS>STATUS_GRAPH</STATUS>
+      <FUNCTION>BACK</FUNCTION>
+     </RSMPE_STAF>
      <RSMPE_STAF>
       <STATUS>STATUS_GRAPH</STATUS>
       <FUNCTION>CANC</FUNCTION>
      </RSMPE_STAF>
      <RSMPE_STAF>
       <STATUS>STATUS_GRAPH</STATUS>
+      <FUNCTION>EXIT</FUNCTION>
+     </RSMPE_STAF>
+     <RSMPE_STAF>
+      <STATUS>STATUS_GRAPH</STATUS>
       <FUNCTION>REFRESH</FUNCTION>
+     </RSMPE_STAF>
+     <RSMPE_STAF>
+      <STATUS>STATUS_GRAPH</STATUS>
+      <FUNCTION>SIM_BACK</FUNCTION>
+     </RSMPE_STAF>
+     <RSMPE_STAF>
+      <STATUS>STATUS_GRAPH</STATUS>
+      <FUNCTION>SIM_FWD</FUNCTION>
+     </RSMPE_STAF>
+     <RSMPE_STAF>
+      <STATUS>STATUS_GRAPH</STATUS>
+      <FUNCTION>SIM_RESET</FUNCTION>
      </RSMPE_STAF>
      <RSMPE_STAF>
       <STATUS>STATUS_GRAPH</STATUS>
@@ -291,6 +423,10 @@
      <RSMPE_STAF>
       <STATUS>STATUS_GRAPH</STATUS>
       <FUNCTION>VIEW_KPI</FUNCTION>
+     </RSMPE_STAF>
+     <RSMPE_STAF>
+      <STATUS>STATUS_GRAPH</STATUS>
+      <FUNCTION>VIEW_SIM</FUNCTION>
      </RSMPE_STAF>
      <RSMPE_STAF>
       <STATUS>STATUS_GRAPH</STATUS>
@@ -310,13 +446,13 @@
       <OBJ_TYPE>P</OBJ_TYPE>
       <OBJ_CODE>000001</OBJ_CODE>
       <MODAL>P</MODAL>
-      <INT_NOTE>Dashboard Status</INT_NOTE>
+      <INT_NOTE>Dashboard Status with Simulation Controls</INT_NOTE>
      </RSMPE_ATRT>
      <RSMPE_ATRT>
       <OBJ_TYPE>B</OBJ_TYPE>
       <OBJ_CODE>000001</OBJ_CODE>
       <SUB_CODE>0001</SUB_CODE>
-      <INT_NOTE>Dashboard Status</INT_NOTE>
+      <INT_NOTE>Main Application Bar</INT_NOTE>
      </RSMPE_ATRT>
     </DOC>
     <TIT>
