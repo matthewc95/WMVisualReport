@@ -242,7 +242,8 @@ DATA:
   gv_okcode_graph      TYPE sy-ucomm,   " OK code / Codice OK
   gv_graph_initialized TYPE abap_bool,  " Init flag / Flag inizializzazione
   gv_current_view      TYPE i VALUE 1,  " Current view (1-7) / Vista corrente (1-7)
-  gv_last_view_pbo     TYPE i VALUE 0.  " Last view for PBO / Ultima vista per PBO
+  gv_last_view_pbo     TYPE i VALUE 0,  " Last view for PBO / Ultima vista per PBO
+  gv_last_layout_mode  TYPE i VALUE 0.  " 0=top/bottom, 7=left/right / 0=sopra/sotto, 7=sinistra/destra
 
 *----------------------------------------------------------------------*
 * Types - Movement Simulation
