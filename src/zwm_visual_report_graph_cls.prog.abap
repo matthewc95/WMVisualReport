@@ -1302,7 +1302,11 @@ CLASS lcl_movement_simulator DEFINITION FINAL.
       mv_min_date       TYPE sydatum,
       mv_max_date       TYPE sydatum,
       mv_playing        TYPE abap_bool,
-      mv_speed          TYPE i VALUE 1.
+      mv_speed          TYPE i VALUE 1,
+      " Daily mode flag - when range > 7 days, aggregate by day
+      " Flag modalità giornaliera - quando range > 7 giorni, aggrega per giorno
+      mv_daily_mode     TYPE abap_bool,
+      mv_total_steps    TYPE i.   " Total steps (hours or days) / Passi totali (ore o giorni)
 
     METHODS:
       " Build storage type positions for visualization
@@ -1470,6 +1474,8 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD prepare_timeline.
+    DATA: lv_day_range TYPE i.
+
     " Determine date range
     " Determina intervallo date
     IF mt_movements IS NOT INITIAL.
@@ -1480,16 +1486,31 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
       READ TABLE mt_movements INTO DATA(ls_last) INDEX lv_last_idx.
       mv_max_date = ls_last-event_date.
 
-      " Calculate total hours in range
-      " Calcola ore totali nell'intervallo
-      mv_total_hours = ( mv_max_date - mv_min_date + 1 ) * 24.
-      IF mv_total_hours < 1.
+      " Calculate day range / Calcola intervallo giorni
+      lv_day_range = mv_max_date - mv_min_date + 1.
+
+      " If range > 7 days, use daily mode instead of hourly
+      " Se range > 7 giorni, usa modalità giornaliera invece che oraria
+      IF lv_day_range > 7.
+        mv_daily_mode = abap_true.
+        mv_total_steps = lv_day_range.
+        mv_total_hours = lv_day_range.  " For backward compat / Per compat retroattiva
+      ELSE.
+        mv_daily_mode = abap_false.
+        mv_total_hours = lv_day_range * 24.
+        mv_total_steps = mv_total_hours.
+      ENDIF.
+
+      IF mv_total_steps < 1.
+        mv_total_steps = 1.
         mv_total_hours = 24.
       ENDIF.
     ELSE.
       mv_min_date = sy-datum.
       mv_max_date = sy-datum.
+      mv_daily_mode = abap_false.
       mv_total_hours = 24.
+      mv_total_steps = 24.
     ENDIF.
 
     " Initialize stats
@@ -1501,16 +1522,27 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
     DATA: lv_target_date TYPE sydatum,
           lv_target_hour TYPE i.
 
-    " Calculate target date/hour from absolute hour index
-    " Calcola data/ora target dall'indice ora assoluto
-    lv_target_date = mv_min_date + ( iv_hour DIV 24 ).
-    lv_target_hour = iv_hour MOD 24.
-
-    LOOP AT mt_movements INTO DATA(ls_move)
-      WHERE event_date = lv_target_date
-        AND event_hour = lv_target_hour.
-      APPEND ls_move TO rt_moves.
-    ENDLOOP.
+    " Calculate target date/hour from index based on mode
+    " Calcola data/ora target dall'indice in base alla modalità
+    IF mv_daily_mode = abap_true.
+      " Daily mode: iv_hour is day index, get all movements for that day
+      " Modalità giornaliera: iv_hour è indice giorno, ottieni tutti i movimenti del giorno
+      lv_target_date = mv_min_date + iv_hour.
+      LOOP AT mt_movements INTO DATA(ls_move_day)
+        WHERE event_date = lv_target_date.
+        APPEND ls_move_day TO rt_moves.
+      ENDLOOP.
+    ELSE.
+      " Hourly mode
+      " Modalità oraria
+      lv_target_date = mv_min_date + ( iv_hour DIV 24 ).
+      lv_target_hour = iv_hour MOD 24.
+      LOOP AT mt_movements INTO DATA(ls_move)
+        WHERE event_date = lv_target_date
+          AND event_hour = lv_target_hour.
+        APPEND ls_move TO rt_moves.
+      ENDLOOP.
+    ENDIF.
   ENDMETHOD.
 
   METHOD calculate_current_stats.
@@ -1525,13 +1557,22 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
       <fs_st>-current_stock = 0.
     ENDLOOP.
 
-    " Calculate date/hour
-    " Calcola data/ora
-    lv_target_date = mv_min_date + ( mv_current_hour DIV 24 ).
-    lv_target_hour = mv_current_hour MOD 24.
+    " Calculate date/hour based on mode
+    " Calcola data/ora in base alla modalità
+    IF mv_daily_mode = abap_true.
+      " Daily mode: mv_current_hour is actually day index
+      " Modalità giornaliera: mv_current_hour è in realtà l'indice giorno
+      lv_target_date = mv_min_date + mv_current_hour.
+      lv_target_hour = 23.  " Include all hours of the day / Includi tutte le ore del giorno
+    ELSE.
+      " Hourly mode
+      " Modalità oraria
+      lv_target_date = mv_min_date + ( mv_current_hour DIV 24 ).
+      lv_target_hour = mv_current_hour MOD 24.
+    ENDIF.
 
-    " Count movements up to current hour
-    " Conta movimenti fino all'ora corrente
+    " Count movements up to current date/hour
+    " Conta movimenti fino alla data/ora corrente
     LOOP AT mt_movements INTO DATA(ls_move)
       WHERE event_date < lv_target_date
          OR ( event_date = lv_target_date AND event_hour <= lv_target_hour ).
@@ -1565,18 +1606,28 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD step_forward.
-    IF mv_current_hour < mv_total_hours - 1.
-      mv_current_hour = mv_current_hour + mv_speed.
-      IF mv_current_hour > mv_total_hours - 1.
-        mv_current_hour = mv_total_hours - 1.
+    DATA: lv_step TYPE i.
+
+    " In daily mode, step by 1 day; in hourly mode, step by speed (hours)
+    " In modalità giornaliera, avanza di 1 giorno; in oraria, avanza per velocità (ore)
+    lv_step = COND #( WHEN mv_daily_mode = abap_true THEN mv_speed ELSE mv_speed ).
+
+    IF mv_current_hour < mv_total_steps - 1.
+      mv_current_hour = mv_current_hour + lv_step.
+      IF mv_current_hour > mv_total_steps - 1.
+        mv_current_hour = mv_total_steps - 1.
       ENDIF.
       calculate_current_stats( ).
     ENDIF.
   ENDMETHOD.
 
   METHOD step_backward.
+    DATA: lv_step TYPE i.
+
+    lv_step = COND #( WHEN mv_daily_mode = abap_true THEN mv_speed ELSE mv_speed ).
+
     IF mv_current_hour > 0.
-      mv_current_hour = mv_current_hour - mv_speed.
+      mv_current_hour = mv_current_hour - lv_step.
       IF mv_current_hour < 0.
         mv_current_hour = 0.
       ENDIF.
@@ -1617,16 +1668,23 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
           lv_time_str    TYPE string,
           lv_progress    TYPE p LENGTH 5 DECIMALS 1.
 
-    " Calculate current time
-    " Calcola ora corrente
-    lv_target_date = mv_min_date + ( mv_current_hour DIV 24 ).
-    lv_target_hour = mv_current_hour MOD 24.
-    lv_time_str = |{ lv_target_date DATE = USER } { lv_target_hour }:00|.
+    " Calculate current time based on mode
+    " Calcola ora corrente in base alla modalità
+    IF mv_daily_mode = abap_true.
+      " Daily mode - show only date / Modalità giornaliera - mostra solo data
+      lv_target_date = mv_min_date + mv_current_hour.
+      lv_time_str = |{ lv_target_date DATE = USER }|.
+    ELSE.
+      " Hourly mode - show date and hour / Modalità oraria - mostra data e ora
+      lv_target_date = mv_min_date + ( mv_current_hour DIV 24 ).
+      lv_target_hour = mv_current_hour MOD 24.
+      lv_time_str = |{ lv_target_date DATE = USER } { lv_target_hour }:00|.
+    ENDIF.
 
     " Calculate progress percentage
     " Calcola percentuale progresso
-    IF mv_total_hours > 0.
-      lv_progress = ( mv_current_hour / mv_total_hours ) * 100.
+    IF mv_total_steps > 0.
+      lv_progress = ( mv_current_hour / mv_total_steps ) * 100.
     ENDIF.
 
     " Build HTML
@@ -1911,16 +1969,26 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD generate_timeline_control.
-    DATA: lv_progress TYPE p LENGTH 5 DECIMALS 1,
-          lv_start_str TYPE string,
-          lv_end_str   TYPE string.
+    DATA: lv_progress   TYPE p LENGTH 5 DECIMALS 1,
+          lv_start_str  TYPE string,
+          lv_end_str    TYPE string,
+          lv_step_label TYPE string.
 
-    IF mv_total_hours > 0.
-      lv_progress = ( mv_current_hour / mv_total_hours ) * 100.
+    IF mv_total_steps > 0.
+      lv_progress = ( mv_current_hour / mv_total_steps ) * 100.
     ENDIF.
 
     lv_start_str = |{ mv_min_date DATE = USER }|.
     lv_end_str = |{ mv_max_date DATE = USER }|.
+
+    " Different label for daily vs hourly mode
+    " Etichetta diversa per modalità giornaliera vs oraria
+    IF mv_daily_mode = abap_true.
+      DATA(lv_curr_date) = mv_min_date + mv_current_hour.
+      lv_step_label = |Day / Giorno { mv_current_hour + 1 } of / di { mv_total_steps } ({ lv_curr_date DATE = USER })|.
+    ELSE.
+      lv_step_label = |Hour / Ora { mv_current_hour + 1 } of / di { mv_total_steps }|.
+    ENDIF.
 
     rv_html =
       |<div class="timeline-control">| &&
@@ -1929,7 +1997,7 @@ CLASS lcl_movement_simulator IMPLEMENTATION.
       |</div>| &&
       |<div class="timeline-info">| &&
       |<span>{ lv_start_str }</span>| &&
-      |<span>Hour / Ora { mv_current_hour + 1 } of / di { mv_total_hours }</span>| &&
+      |<span>{ lv_step_label }</span>| &&
       |<span>{ lv_end_str }</span>| &&
       |</div>| &&
       |</div>|.

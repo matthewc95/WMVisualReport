@@ -75,7 +75,43 @@ MODULE init_screen OUTPUT.
         lv_len       TYPE i,                         " Length to copy / Lunghezza da copiare
         lv_remaining TYPE i.                         " Remaining length / Lunghezza rimanente
 
-  DATA: lo_controller TYPE REF TO lcl_controller_graph.
+  DATA: lo_controller TYPE REF TO lcl_controller_graph,
+        lv_new_layout TYPE i.
+
+  lo_controller = lcl_controller_graph=>get_instance( ).
+
+  " Determine required layout mode based on view
+  " Determina modalità layout richiesta in base alla vista
+  " View 7 (simulation) = left/right (columns), others = top/bottom (rows)
+  " Vista 7 (simulazione) = sinistra/destra (colonne), altre = sopra/sotto (righe)
+  lv_new_layout = COND #( WHEN lo_controller->get_current_view( ) = 7 THEN 7 ELSE 0 ).
+
+  " Check if we need to recreate splitter due to layout change
+  " Verifica se dobbiamo ricreare lo splitter per cambio layout
+  IF gv_graph_initialized = abap_true AND gv_last_layout_mode <> lv_new_layout.
+    " Layout mode changed - destroy splitter to recreate with new orientation
+    " Modalità layout cambiata - distruggi splitter per ricreare con nuova orientazione
+    IF go_html_dashboard IS BOUND.
+      go_html_dashboard->free( ).
+      FREE go_html_dashboard.
+      CLEAR go_html_dashboard.
+    ENDIF.
+    IF go_alv_splitter IS BOUND.
+      go_alv_splitter->free( ).
+      FREE go_alv_splitter.
+      CLEAR go_alv_splitter.
+      CLEAR go_alv_subcontainer.
+    ENDIF.
+    IF go_splitter_main IS BOUND.
+      go_splitter_main->free( ).
+      FREE go_splitter_main.
+      CLEAR go_splitter_main.
+      CLEAR go_cont_dashboard.
+      CLEAR go_cont_alv.
+    ENDIF.
+    cl_gui_cfw=>flush( ).
+    gv_graph_initialized = abap_false.
+  ENDIF.
 
   " Only initialize once per screen call (unless view changed)
   " Inizializza solo una volta per chiamata schermata (salvo cambio vista)
@@ -93,33 +129,60 @@ MODULE init_screen OUTPUT.
           OTHERS         = 1.
     ENDIF.
 
-    " Step 2: Create 2-row splitter inside the custom container
-    " Passo 2: Crea splitter a 2 righe dentro il container custom
+    " Step 2: Create splitter based on layout mode
+    " Passo 2: Crea splitter in base alla modalità layout
     IF go_splitter_main IS INITIAL AND go_custom_container IS BOUND.
-      CREATE OBJECT go_splitter_main
-        EXPORTING
-          parent  = go_custom_container
-          rows    = 2      " 2 rows: top=dashboard, bottom=ALV / 2 righe: sopra=dashboard, sotto=ALV
-          columns = 1      " Single column layout / Layout colonna singola
-        EXCEPTIONS
-          OTHERS  = 1.
+      IF lv_new_layout = 7.
+        " SIMULATION VIEW: Left/Right layout (1 row, 2 columns - 60% HTML, 40% ALV)
+        " VISTA SIMULAZIONE: Layout sinistra/destra (1 riga, 2 colonne - 60% HTML, 40% ALV)
+        CREATE OBJECT go_splitter_main
+          EXPORTING
+            parent  = go_custom_container
+            rows    = 1
+            columns = 2
+          EXCEPTIONS
+            OTHERS  = 1.
 
-      " Set row heights: 35% for dashboard, 65% for ALV
-      " Imposta altezze righe: 35% per dashboard, 65% per ALV
-      go_splitter_main->set_row_height(
-        EXPORTING
-          id     = 1
-          height = gc_split_top ).
+        " Set column widths: 60% for HTML simulation, 40% for ALV detail
+        " Imposta larghezze colonne: 60% per simulazione HTML, 40% per dettaglio ALV
+        go_splitter_main->set_column_width(
+          EXPORTING
+            id    = 1
+            width = 60 ).
 
-      " Get container references for dashboard and ALV
-      " Ottieni riferimenti container per dashboard e ALV
-      go_cont_dashboard = go_splitter_main->get_container(
-        row    = 1
-        column = 1 ).
+        go_cont_dashboard = go_splitter_main->get_container(
+          row    = 1
+          column = 1 ).
 
-      go_cont_alv = go_splitter_main->get_container(
-        row    = 2
-        column = 1 ).
+        go_cont_alv = go_splitter_main->get_container(
+          row    = 1
+          column = 2 ).
+      ELSE.
+        " NORMAL VIEWS: Top/Bottom layout (2 rows, 1 column - 35% dashboard, 65% ALV)
+        " VISTE NORMALI: Layout sopra/sotto (2 righe, 1 colonna - 35% dashboard, 65% ALV)
+        CREATE OBJECT go_splitter_main
+          EXPORTING
+            parent  = go_custom_container
+            rows    = 2
+            columns = 1
+          EXCEPTIONS
+            OTHERS  = 1.
+
+        " Set row heights: 35% for dashboard, 65% for ALV
+        " Imposta altezze righe: 35% per dashboard, 65% per ALV
+        go_splitter_main->set_row_height(
+          EXPORTING
+            id     = 1
+            height = gc_split_top ).
+
+        go_cont_dashboard = go_splitter_main->get_container(
+          row    = 1
+          column = 1 ).
+
+        go_cont_alv = go_splitter_main->get_container(
+          row    = 2
+          column = 1 ).
+      ENDIF.
     ENDIF.
 
     " Step 3: Create HTML viewer for dashboard display
@@ -133,13 +196,12 @@ MODULE init_screen OUTPUT.
     ENDIF.
 
     gv_graph_initialized = abap_true.
+    gv_last_layout_mode = lv_new_layout.
   ENDIF.
 
   " Load dashboard or simulation HTML based on current view
   " Carica HTML dashboard o simulazione in base alla vista corrente
   IF go_html_dashboard IS BOUND.
-    lo_controller = lcl_controller_graph=>get_instance( ).
-
     " Use simulation HTML for view 7, otherwise use dashboard
     " Usa HTML simulazione per vista 7, altrimenti usa dashboard
     IF lo_controller->get_current_view( ) = 7.
