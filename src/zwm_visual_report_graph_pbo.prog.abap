@@ -216,11 +216,19 @@ MODULE display_alv OUTPUT.
   IF gv_last_view_pbo <> lo_ctrl->get_current_view( ) OR
      lo_ctrl->mo_alv_handler->mo_salv IS NOT BOUND.
 
-    " Free previous SALV instance to avoid memory leaks
-    " Libera istanza SALV precedente per evitare memory leak
+    " IMPORTANT: Close and destroy previous SALV properly
+    " IMPORTANTE: Chiudi e distruggi SALV precedente correttamente
+    " Simply using FREE doesn't remove the control from the container
+    " Usare solo FREE non rimuove il controllo dal container
     IF lo_ctrl->mo_alv_handler->mo_salv IS BOUND.
+      lo_ctrl->mo_alv_handler->mo_salv->close_screen( ).
       FREE lo_ctrl->mo_alv_handler->mo_salv.
+      CLEAR lo_ctrl->mo_alv_handler->mo_salv.
     ENDIF.
+
+    " Flush the GUI to ensure cleanup completes
+    " Flush GUI per assicurare completamento pulizia
+    cl_gui_cfw=>flush( ).
 
     " Display current view data in ALV
     " Visualizza dati vista corrente in ALV
